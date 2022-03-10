@@ -12,6 +12,7 @@ object ClinksCalculator:
     * @return n!
     */
   def factorial(n: Int): BigInt =
+    require(n >= 0, "Only positive numbers")
     @tailrec
     def loop(acc: BigInt, n: Int): BigInt =
       if n == 0 then acc
@@ -24,6 +25,5 @@ object ClinksCalculator:
     * @param k the second number
     * @return n choose k
     */
-  // TODO - Part 1 Step 1
   def calculateCombination(n: Int, k: Int): Int = (factorial(n) / (factorial(k) * factorial(n - k))).toInt
 end ClinksCalculator
