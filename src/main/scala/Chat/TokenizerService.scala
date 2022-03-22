@@ -12,16 +12,17 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     * @param input The user's input
     * @return A Tokenizer which allows iteration over the tokens of the input
     */
+  //TODO demander pour char special à enlever
   def tokenize(input: String): Tokenized =
     new TokenizedImpl(
-      input.replaceAll("[-+.^:,]", "")
-        .split("[\\s']+")
+      input.replaceAll("[-+^:.,!?*]", "")
+        .split("[\\s'’]+")
         .map( word => createToken( spellCheckerSvc.getClosestWordInDictionary(word) ))
     )
 
   private def createToken(word : String): (String, Token) = word -> findToken(word)
 
-  //TODO domander pour Token -> BAD
+  //TODO demander pour Token -> BAD
   private def findToken(word: String): Token = word match {
     case "bonjour" => BONJOUR
     case "je" => JE

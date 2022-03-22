@@ -45,5 +45,6 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
 //    sd(s1.toList, s2.toList)
 
   // TODO - Part 1 Step 2
+  // TODO à completer
   def getClosestWordInDictionary(misspelledWord: String): String = dictionary.getOrElse(misspelledWord, misspelledWord)
 end SpellCheckerImpl
