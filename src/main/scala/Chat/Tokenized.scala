@@ -1,7 +1,6 @@
 package Chat
 
-import Chat.Token.*
-import Utils.SpellCheckerService
+import Chat.Token._
 
 trait Tokenized:
   /**
@@ -13,9 +12,11 @@ trait Tokenized:
 class TokenizedImpl(val tokens: Array[(String, Token)]) extends Tokenized:
   private var index = -1
   def nextToken(): (String, Token) =
-    require(index + 1 < tokens.length, "Buffer overflow")
-    index = index + 1
-    tokens(index)
-
-
+    if index + 1 < tokens.length then {
+      index = index + 1
+      tokens(index)
+    }
+    else {
+      "EOL" -> EOL
+    }
 end TokenizedImpl
