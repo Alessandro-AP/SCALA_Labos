@@ -1,6 +1,7 @@
 package Chat
 
 import Chat.Token.*
+import Utils.Dictionary.dictionary
 import Utils.SpellCheckerService
 
 class TokenizerService(spellCheckerSvc: SpellCheckerService):
@@ -9,6 +10,10 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     * @param input The user's input
     * @return A Tokenizer which allows iteration over the tokens of the input
     */
-  // TODO - Part 1 Step 3
-  def tokenize(input: String): Tokenized = ???
+  def tokenize(input: String): Tokenized =
+    TokenizedImpl(
+      input.replaceAll("[-+.^:,]", "")
+        .split("[\\s']+")
+        .map( word => (dictionary(word), ))
+    )
 end TokenizerService

@@ -29,5 +29,5 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
   def stringDistance(s1: String, s2: String): Int = ???
 
   // TODO - Part 1 Step 2
-  def getClosestWordInDictionary(misspelledWord: String): String = ???
+  def getClosestWordInDictionary(misspelledWord: String): String = dictionary(misspelledWord)
 end SpellCheckerImpl
