@@ -12,6 +12,7 @@ object ClinksCalculator:
     * @return n!
     */
   def factorial(n: Int): BigInt =
+    require(n >= 0, "Only positive numbers")
     @tailrec
     def loop(acc: BigInt, n: Int): BigInt =
       if n == 0 then acc
