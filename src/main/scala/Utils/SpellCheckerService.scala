@@ -46,5 +46,19 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
 
   // TODO - Part 1 Step 2
   // TODO à completer
-  def getClosestWordInDictionary(misspelledWord: String): String = dictionary.getOrElse(misspelledWord, misspelledWord)
+  def getClosestWordInDictionary(misspelledWord: String): String =
+    if (misspelledWord.charAt(0) == '_' || (misspelledWord forall Character.isDigit))
+      misspelledWord
+    else
+      val closestWord = dictionary.keys.reduce(
+        (word1, word2) => {
+            val dist1 = stringDistance(word1, misspelledWord)
+            val dist2 = stringDistance(word2, misspelledWord)
+            if dist1 == dist2 then
+              if word1 > word2 then word2 else word1
+            else if dist1 > dist2 then word2
+            else word1
+        }
+      )
+      dictionary(closestWord)
 end SpellCheckerImpl
