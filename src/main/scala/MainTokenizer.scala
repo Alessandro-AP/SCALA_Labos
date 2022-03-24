@@ -18,6 +18,7 @@ object MainTokenizer:
           for i <- 2 to 6 do
             println(s"Nombre de *clinks* pour un santé de $i personnes : ${ClinksCalculator.calculateCombination(i, 2)}.")
         case s =>
+          val startTime = System.currentTimeMillis()
           // Tokenize the user input.
           val tokenizer = tokenizerSvc.tokenize(s)
 
@@ -28,7 +29,7 @@ object MainTokenizer:
             // Loop condition
             currentToken._2 != Token.EOL
           do ()
-
+          println("Execution time: " + (System.currentTimeMillis() - startTime) + " milliseconds")
           println("============================================")
     end while
   end main

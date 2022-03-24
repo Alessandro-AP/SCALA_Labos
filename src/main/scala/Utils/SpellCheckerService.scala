@@ -35,14 +35,13 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
       case (h1::t1, h2::t2) => min(levenshtein(t1, s2) + 1, levenshtein(s1, t2) + 1,
         levenshtein(t1, t2) + (if (h1 == h2) 0 else 1))
     }
-    levenshtein(s1.toList, s2.toList)
     // TODO check if takes too much time, otherwise try the algorithm with cache
-//    val memo = scala.collection.mutable.Map[(List[Char], List[Char]), Int]()
-//    def sd(s1: List[Char], s2: List[Char]): Int = {
-//      if !memo.contains((s1, s2)) then memo((s1, s2)) = levenshtein(s1, s2)
-//      memo((s1, s2))
-//    }
-//    sd(s1.toList, s2.toList)
+    val memo = scala.collection.mutable.Map[(List[Char], List[Char]), Int]()
+    def sd(s1: List[Char], s2: List[Char]): Int = {
+      if !memo.contains((s1, s2)) then memo((s1, s2)) = levenshtein(s1, s2)
+      memo((s1, s2))
+    }
+    sd(s1.toList, s2.toList)
 
   // TODO - Part 1 Step 2
   // TODO à completer
