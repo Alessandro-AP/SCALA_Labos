@@ -1,5 +1,15 @@
+// SCALA - Labo 1
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 27.03.22
+
 package Utils
 
+import scala.collection.mutable
+
+/**
+  * Authors: Alessandro Parrino, Daniel Sciarra ◕◡◕
+  * Date: 27.03.22
+  */
 trait SpellCheckerService:
   /**
     * This dictionary is a Map object that contains valid words as keys and their normalized equivalents as values (e.g.
@@ -25,39 +35,34 @@ trait SpellCheckerService:
 end SpellCheckerService
 
 class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellCheckerService:
-  // TODO - Part 1 Step 2
+
+  // List of authorized words
+  private val dictionaryKeys = dictionary.keys.toVector
+
   def stringDistance(s1: String, s2: String): Int =
-    def min(a: Int, b: Int, c: Int) = Math.min(Math.min(a, b), c)
+    def minimum(a: Int, b: Int, c: Int) = a min b min c
 
     def levenshtein(s1: List[Char], s2: List[Char]): Int = (s1, s2) match {
       case (_, Nil) => s1.length
       case (Nil, _) => s2.length
-      case (h1::t1, h2::t2) => min(levenshtein(t1, s2) + 1, levenshtein(s1, t2) + 1,
+      case (h1::t1, h2::t2) => minimum(levenshtein(t1, s2) + 1, levenshtein(s1, t2) + 1,
         levenshtein(t1, t2) + (if (h1 == h2) 0 else 1))
     }
-    // TODO check if takes too much time, otherwise try the algorithm with cache
-    val memo = scala.collection.mutable.Map[(List[Char], List[Char]), Int]()
-    def sd(s1: List[Char], s2: List[Char]): Int = {
-      if !memo.contains((s1, s2)) then memo((s1, s2)) = levenshtein(s1, s2)
-      memo((s1, s2))
-    }
-    sd(s1.toList, s2.toList)
+    levenshtein(s1.toList, s2.toList)
 
-  // TODO - Part 1 Step 2
-  // TODO à completer
   def getClosestWordInDictionary(misspelledWord: String): String =
     if (misspelledWord.charAt(0) == '_' || (misspelledWord forall Character.isDigit))
       misspelledWord
     else
-      val closestWord = dictionary.keys.reduce(
-        (word1, word2) => {
-            val dist1 = stringDistance(word1, misspelledWord)
-            val dist2 = stringDistance(word2, misspelledWord)
-            if dist1 == dist2 then
-              if word1 > word2 then word2 else word1
-            else if dist1 > dist2 then word2
-            else word1
-        }
-      )
-      dictionary(closestWord)
+      var closestWord = (dictionaryKeys.head, stringDistance(dictionaryKeys.head, misspelledWord))
+
+      for (i <- 1 until dictionaryKeys.size)
+        val dist = stringDistance(dictionaryKeys(i), misspelledWord)
+
+        if dist == closestWord._2 then // We take the word that comes first in the alphabetical order.
+          if dictionaryKeys(i) < closestWord._1 then closestWord = (dictionaryKeys(i), dist)
+        else if dist < closestWord._2 then closestWord = (dictionaryKeys(i), dist)
+
+      dictionary(closestWord._1)
+
 end SpellCheckerImpl

@@ -1,3 +1,7 @@
+// SCALA - Labo 1
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 27.03.22
+
 package Utils
 
 /**

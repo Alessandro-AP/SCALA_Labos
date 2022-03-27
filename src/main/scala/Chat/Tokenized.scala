@@ -1,6 +1,10 @@
+// SCALA - Labo 1
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 27.03.22
+
 package Chat
 
-import Chat.Token._
+import Chat.Token.EOL
 
 trait Tokenized:
   /**
@@ -11,12 +15,12 @@ trait Tokenized:
 
 class TokenizedImpl(val tokens: Array[(String, Token)]) extends Tokenized:
   private var index = -1
+  
   def nextToken(): (String, Token) =
-    if index + 1 < tokens.length then {
+    if index + 1 < tokens.length then 
       index = index + 1
       tokens(index)
-    }
-    else {
+    else 
       "EOL" -> EOL
-    }
+      
 end TokenizedImpl

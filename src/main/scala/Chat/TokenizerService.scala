@@ -1,10 +1,13 @@
+// SCALA - Labo 1
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 27.03.22
+
 package Chat
 
 import Chat.Token._
 import Chat.Tokenized
 import Utils.Dictionary.dictionary
 import Utils.SpellCheckerService
-import Utils.SpellCheckerImpl
 
 class TokenizerService(spellCheckerSvc: SpellCheckerService):
   /**
@@ -12,17 +15,23 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     * @param input The user's input
     * @return A Tokenizer which allows iteration over the tokens of the input
     */
-  //TODO  ajouter plus char spec
   def tokenize(input: String): Tokenized =
     new TokenizedImpl(
-      input.replaceAll("[-+^:.,!?*]", "")
-        .split("[\\s'’]+")
-        .map( word => createToken(  dictionary.getOrElse(word, spellCheckerSvc.getClosestWordInDictionary(word)) ))
+      input.replaceAll("[-+/<>%&#$^~:@{}|.!?*]", "")
+        .split("[\\s'’,;]+")
+        .map(word => createToken(dictionary.getOrElse(word, spellCheckerSvc.getClosestWordInDictionary(word))))
     )
 
-  private def createToken(word : String): (String, Token) = word -> findToken(word)
+  /**
+    * From the word in parameter, create a tuple of this word and its corresponding token.
+    * @return the tuple (word, Token)
+    */
+  private def createToken(word : String): (String, Token) = word -> getTokenByWord(word)
 
-  private def findToken(word: String): Token = word match {
+  /**
+    * Retrieve the corresponding token of the word passed in parameter.
+    */
+  private def getTokenByWord(word: String): Token = word match {
     case "bonjour" => BONJOUR
     case "je" => JE
     case "svp" => SVP
