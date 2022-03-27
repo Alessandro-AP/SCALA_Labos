@@ -59,8 +59,8 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
       for (i <- 1 until dictionaryKeys.size)
         val dist = stringDistance(dictionaryKeys(i), misspelledWord)
 
-        if dist == closestWord._2 then // We take the word that comes first in the alphabetical order.
-          if dictionaryKeys(i) < closestWord._1 then closestWord = (dictionaryKeys(i), dist)
+        // For equal distance, we take the word that comes first in the alphabetical order.
+        if dist == closestWord._2 && dictionaryKeys(i) < closestWord._1 then closestWord = (dictionaryKeys(i), dist)
         else if dist < closestWord._2 then closestWord = (dictionaryKeys(i), dist)
 
       dictionary(closestWord._1)
