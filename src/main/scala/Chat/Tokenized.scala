@@ -18,7 +18,7 @@ class TokenizedImpl(val tokens: Array[(String, Token)]) extends Tokenized:
   
   def nextToken(): (String, Token) =
     if index + 1 < tokens.length then 
-      index = index + 1
+      index += 1
       tokens(index)
     else 
       "EOL" -> EOL

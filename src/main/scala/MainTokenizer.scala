@@ -19,7 +19,6 @@ object MainTokenizer:
       StdIn.readLine.toLowerCase match
         case "quitter" => println("Adieu."); System.exit(0)
         case "santé !" =>
-
           for i <- 2 to 6 do
             println(s"Nombre de *clinks* pour un santé de $i personnes : ${ClinksCalculator.calculateCombination(i, 2)}.")
         case s =>

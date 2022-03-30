@@ -34,14 +34,14 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
   private def getTokenByWord(word: String): Token = word match {
     case "bonjour" => BONJOUR
     case "je" => JE
-    case "svp" => SVP
-    case "assoiffe" => ASSOIFFE
-    case "affame" => AFFAME
     case "etre" => ETRE
     case "vouloir" => VOULOIR
+    case "assoiffe" => ASSOIFFE
+    case "affame" => AFFAME
+    case "biere" | "croissant" => PRODUCT
     case "et" => ET
     case "ou" => OU
-    case "biere" | "croissant" => PRODUCT
+    case "svp" => SVP
     case "EOL" => EOL
     case _ if word.charAt(0) == '_' => PSEUDO
     case _ if word forall Character.isDigit => NUM
