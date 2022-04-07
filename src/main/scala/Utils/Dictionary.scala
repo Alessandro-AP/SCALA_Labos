@@ -13,6 +13,7 @@ object Dictionary:
     "yo" -> "bonjour",
     "je" -> "je",
     "j" -> "je",
+    "appelle" -> "etre",
     "suis" -> "etre",
     "est" -> "etre",
     "veux" -> "vouloir",
