@@ -6,4 +6,5 @@ lazy val root = project
     name := "Bot-tender",
     version := "0.2.0",
     scalaVersion := scala3Version,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.11" % "test"
   )

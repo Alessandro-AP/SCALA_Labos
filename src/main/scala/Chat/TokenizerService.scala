@@ -43,6 +43,7 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     case "assoiffe" => ASSOIFFE
     case "affame" => AFFAME
     case "connaitre" => CONNAITRE
+    case "commander" => COMMANDER
     case "solde" => SOLDE
     case "combien" => COMBIEN
     case "coute" | "prix" => PRIX

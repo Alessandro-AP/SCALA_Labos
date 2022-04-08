@@ -54,6 +54,7 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
     if (misspelledWord.charAt(0) == '_' || (misspelledWord forall Character.isDigit))
       misspelledWord
     else
+      // TODO change implementation (lab 1 correction)
       var closestWord = (dictionaryKeys.head, stringDistance(dictionaryKeys.head, misspelledWord))
 
       for (i <- 1 until dictionaryKeys.size)
