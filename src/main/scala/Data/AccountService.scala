@@ -33,6 +33,8 @@ trait AccountService:
   def purchase(user: String, amount: Double): Double
 
 class AccountImpl extends AccountService:
+  var accounts = List[String,Double]()
+
   // TODO - Part 2 Step 2
   def getAccountBalance(user: String): Double = ???
   def addAccount(user: String, balance: Double): Unit = ???
