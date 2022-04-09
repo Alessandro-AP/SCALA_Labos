@@ -44,11 +44,11 @@ class UnitTest extends AnyFlatSpec with Matchers {
   }
 
   it should "process user requests" in {
-    var req = "Bonjour, je suis _Bob."
+    var req = "Bonjour, je suis _Michel."
     var tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     var expr = Parser(tokenized).parsePhrases()
     var actual = analyzerSvc.reply(session)(expr)
-    var expected = "Hola, bob!"
+    var expected = "Hola, michel!"
     actual shouldBe expected
 
     req = "Combien coûte 1 bière PunkIPA ?"
@@ -69,7 +69,8 @@ class UnitTest extends AnyFlatSpec with Matchers {
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Voici donc 2 punkipa et 1 tenebreuse ! Cela coûte CHF 10.0 et votre nouveau solde est de CHF 20.0."
+    expected = "Voici donc 2 biere punkipa et 1 biere tenebreuse ! Cela coûte CHF 10.0 et votre nouveau solde est de CHF 20.0."
+//    expected = "Voici donc 2 punkipa et 1 tenebreuse ! Cela coûte CHF 10.0 et votre nouveau solde est de CHF 20.0."
     actual shouldBe expected
 
     req = "Je voudrais commander 1 croissant."
@@ -81,7 +82,7 @@ class UnitTest extends AnyFlatSpec with Matchers {
   }
 
   it should "process mutliple users" in {
-    var req = "Bonjour, je suis _Bob."
+    var req = "Bonjour, je m'appelle _Bob."
     var tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     var expr = Parser(tokenized).parsePhrases()
     var actual = analyzerSvc.reply(session)(expr)
@@ -92,7 +93,8 @@ class UnitTest extends AnyFlatSpec with Matchers {
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Voici donc 4 jackhammer ! Cela coûte CHF 12.0 et votre nouveau solde est de CHF 18.0."
+    expected = "Voici donc 4 biere jackhammer ! Cela coûte CHF 12.0 et votre nouveau solde est de CHF 18.0."
+//    expected = "Voici donc 4 jackhammer ! Cela coûte CHF 12.0 et votre nouveau solde est de CHF 18.0."
     actual shouldBe expected
 
     req = "Bonjour, je suis _Alice."
@@ -106,7 +108,7 @@ class UnitTest extends AnyFlatSpec with Matchers {
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Pas de soucis ! Nous pouvons vous offrir des croissants faits maisons !"
+    expected = "Pas de soucis, nous pouvons notamment vous offrir des croissants faits maisons !"
     actual shouldBe expected
 
     req = "Je veux commander 2 croissants cailler."
@@ -141,7 +143,8 @@ class UnitTest extends AnyFlatSpec with Matchers {
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Voici donc 18 farmer ! Cela coûte CHF 18.0 et votre nouveau solde est de CHF 0.0."
+    expected = "Voici donc 18 biere farmer ! Cela coûte CHF 18.0 et votre nouveau solde est de CHF 0.0."
+//    expected = "Voici donc 18 farmer ! Cela coûte CHF 18.0 et votre nouveau solde est de CHF 0.0."
     actual shouldBe expected
   }
 
@@ -153,18 +156,27 @@ class UnitTest extends AnyFlatSpec with Matchers {
     var expected = "Cela coûte CHF 2.0."
     actual shouldBe expected
 
-    req = "je suis _Bob."
+    req = "je suis _Scala."
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Hola, bob!"
+    expected = "Hola, scala!"
     actual shouldBe expected
 
     req = "J'aimerais commander 1 bière wittekop ou 1 croissant"
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Voici donc 1 wittekop ! Cela coûte CHF 2.0 et votre nouveau solde est de CHF 28.0."
+    expected = "Voici donc 1 biere wittekop ! Cela coûte CHF 2.0 et votre nouveau solde est de CHF 28.0."
+//    expected = "Voici donc 1 wittekop ! Cela coûte CHF 2.0 et votre nouveau solde est de CHF 28.0."
+    actual shouldBe expected
+
+    req = "J'aimerais commander 1 bière Ténébreuse ou 1 croissant cailler ou 1 biere"
+    tokenized = tokenizerSvc.tokenize(req.toLowerCase)
+    expr = Parser(tokenized).parsePhrases()
+    actual = analyzerSvc.reply(session)(expr)
+    expected = "Voici donc 1 biere boxer ! Cela coûte CHF 1.0 et votre nouveau solde est de CHF 27.0."
+//    expected = "Voici donc 1 boxer ! Cela coûte CHF 1.0 et votre nouveau solde est de CHF 27.0."
     actual shouldBe expected
   }
 
@@ -176,18 +188,27 @@ class UnitTest extends AnyFlatSpec with Matchers {
     var expected = "Cela coûte CHF 16.0."
     actual shouldBe expected
 
-    req = "je suis _Bob."
+    req = "je suis _President."
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Hola, bob!"
+    expected = "Hola, president!"
     actual shouldBe expected
 
     req = "J'veux commander 2 bières Farmers et 1 bière Jackhammer."
     tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     expr = Parser(tokenized).parsePhrases()
     actual = analyzerSvc.reply(session)(expr)
-    expected = "Voici donc 2 Farmers et 1 Jackhammer ! Cela coûte CHF 5.00 et votre nouveau solde est de CHF 25.0."
+    expected = "Voici donc 2 biere farmer et 1 biere jackhammer ! Cela coûte CHF 5.0 et votre nouveau solde est de CHF 25.0."
+//    expected = "Voici donc 2 farmer et 1 jackhammer ! Cela coûte CHF 5.0 et votre nouveau solde est de CHF 25.0."
+    actual shouldBe expected
+
+    req = "J'veux commander 2 bières Farmers et 1 bière Jackhammer et 1 croissant"
+    tokenized = tokenizerSvc.tokenize(req.toLowerCase)
+    expr = Parser(tokenized).parsePhrases()
+    actual = analyzerSvc.reply(session)(expr)
+    expected = "Voici donc 2 biere farmer et 1 biere jackhammer et 1 croissant maison ! Cela coûte CHF 7.0 et votre nouveau solde est de CHF 18.0."
+//    expected = "Voici donc 2 farmer et 1 jackhammer et 1 croissant maison ! Cela coûte CHF 7.0 et votre nouveau solde est de CHF 18.0."
     actual shouldBe expected
   }
 }

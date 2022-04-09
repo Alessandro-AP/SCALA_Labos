@@ -4,7 +4,17 @@ trait ProductService:
   type BrandName = String
   type ProductName = String
 
+  /**
+    * Retrieve the price of a given product.
+    * @param product Product's name.
+    * @param brand Product's brand name.
+    */
   def getPrice(product: ProductName, brand: BrandName): Double
+
+  /**
+    * Retrieve the default brand of a given product.
+    * @param product Product's name.
+    */
   def getDefaultBrand(product: ProductName): BrandName
 
 class ProductImpl extends ProductService:
@@ -27,7 +37,7 @@ class ProductImpl extends ProductService:
     else 0.0
 
   def getDefaultBrand(product: ProductName): BrandName =
-    if (product == "biere") "maison"
-    else if (product == "croissant") "boxer"
+    if (product == "biere") "boxer"
+    else if (product == "croissant") "maison"
     else ""
 end ProductImpl

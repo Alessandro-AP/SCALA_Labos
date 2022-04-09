@@ -39,18 +39,24 @@ class Parser(tokenized: Tokenized):
       readToken()
       curToken match {
         case ETRE => parseToBeOrNotToBe
-        case VOULOIR =>
-          readToken()
-          curToken match {
-            case COMMANDER => parseOrder
-            case CONNAITRE => parseSolde
-            case _ => expected(COMMANDER, CONNAITRE)
-          }
+        case VOULOIR => parseAction
         case ME => parsePseudoByCall
         case _ => expected(ETRE, VOULOIR, ME)
       }
     else
       parsePriceDemand()
+
+  /**
+    * Parses a user action.
+    */
+  private def parseAction = {
+    readToken()
+    curToken match {
+      case COMMANDER => parseOrder
+      case CONNAITRE => parseSolde
+      case _ => expected(COMMANDER, CONNAITRE)
+    }
+  }
 
   /**
     * Parses the user state of mind or it's pseudo.
@@ -91,7 +97,7 @@ class Parser(tokenized: Tokenized):
     * Parse a product request to generate either a ProductRequest node or a DefaultProductRequest node.
     */
   private def parseProductRequest(): ExprTree =
-    //    var brand : String = "" // et un seul Noeud ProductRequest(nb, prod, brand)
+    //    var brand : String = "" // TODO ? et un seul Noeud ProductRequest(quantity, productType, brand)
     val quantity = Integer.parseInt(eat(NUM))
     val productType = eat(PRODUCT)
 
@@ -110,6 +116,7 @@ class Parser(tokenized: Tokenized):
     */
   @tailrec
   private def parseMultiProductRequest(req: ExprTree): ExprTree = curToken match {
+    // TODO stocker req inside au lieu du param ? car est tjs = à parseProductRequest()
       case ET =>
         readToken()
         parseMultiProductRequest(And(req, parseProductRequest()))
