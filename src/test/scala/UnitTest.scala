@@ -33,7 +33,7 @@ class UnitTest extends AnyFlatSpec with Matchers {
     var tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     var expr = Parser(tokenized).parsePhrases()
     var actual = analyzerSvc.reply(session)(expr)
-    val expected = "Veuillez d’abord vous identifier."
+    val expected = "Veuillez d'abord vous identifier."
     actual shouldBe expected
 
     req = "J'aimerais connaitre mon solde."
@@ -211,4 +211,21 @@ class UnitTest extends AnyFlatSpec with Matchers {
 //    expected = "Voici donc 2 farmer et 1 jackhammer et 1 croissant maison ! Cela coûte CHF 7.0 et votre nouveau solde est de CHF 18.0."
     actual shouldBe expected
   }
+
+  it should "process mix of ET and OU correctly" in {
+    var req = "Bonjour, je m'appelle _Compliqué."
+    var tokenized = tokenizerSvc.tokenize(req.toLowerCase)
+    var expr = Parser(tokenized).parsePhrases()
+    var actual = analyzerSvc.reply(session)(expr)
+    var expected = "Hola, compliqué!"
+    actual shouldBe expected
+
+    req = "J'aimerais commander 1 biere punkipa et 1 biere boxer ou 1 biere farmer ou 1 biere tenebreuse et 1 biere boxer"
+    tokenized = tokenizerSvc.tokenize(req.toLowerCase)
+    expr = Parser(tokenized).parsePhrases()
+    actual = analyzerSvc.reply(session)(expr)
+    expected = "Voici donc 1 biere farmer et 1 biere boxer ! Cela coûte CHF 2.0 et votre nouveau solde est de CHF 28.0."
+    actual shouldBe expected
+  }
+
 }

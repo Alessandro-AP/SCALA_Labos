@@ -3,6 +3,8 @@ package Data
 import scala.collection.mutable
 
 trait AccountService:
+  val defaultBalance: Double = 30.0
+
   /**
     * Retrieve the balance of a given account
     * @param user the name of the user whose account will be retrieve
@@ -46,6 +48,5 @@ class AccountImpl extends AccountService:
     val newBalance = accounts(user) - amount
     accounts(user) = newBalance
     newBalance
-  end purchase
 
 end AccountImpl

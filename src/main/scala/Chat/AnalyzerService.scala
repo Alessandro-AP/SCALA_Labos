@@ -36,21 +36,57 @@ class AnalyzerService(productSvc: ProductService,
       case Thirsty() => "Eh bien, la chance est de votre côté, car nous offrons les meilleures bières de la région !"
       case Hungry() => "Pas de soucis, nous pouvons notamment vous offrir des croissants faits maisons !"
       // Identification
-      case Login(name) =>
-        session.setCurrentUser(name)
-        if !accountSvc.isAccountExisting(name) then accountSvc.addAccount(name, session.defaultBalance)
-        "Hola, " + name + "!"
+      case Login(name) => processLogin(name, session)
       // Orders & products
       case ProductRequest(quantity, productType, brand) => quantity.toString + " " + productType + " " + brand // TODO afficher seulement le productType pour les croissants comme dans donnée ou on s'en fout car libre et if else dégueux?
       case DefaultProductRequest(quantity, productType) => quantity.toString + " " + productType + " " + productSvc.getDefaultBrand(productType)
-      case Order(request) =>
-        val cost = computePrice(request)
-        "Voici donc " + inner(request) + " ! Cela coûte CHF " + cost +
-          " et votre nouveau solde est de CHF " + accountSvc.purchase(session.getCurrentUser.get, cost) + "."
+      case Order(request) => processOrder(request, session)
       case Price(request) => "Cela coûte CHF " + computePrice(request) + "."
-      case Solde() => "Le montant actuel de votre solde est de CHF " + 
-        accountSvc.getAccountBalance(session.getCurrentUser.get) + "."
+      case Solde() => processSolde(session)
       // Logical op
-      case Or(left, right) => if computePrice(left) < computePrice(right) then inner(left) else inner(right)
+      case Or(left, right) => if computePrice(left) <= computePrice(right) then inner(left) else inner(right)
       case And(left, right) => inner(left) + " et " + inner(right)
+
+  end reply
+
+  /**
+    * Processes a login request.
+    * @param name the user name.
+    * @param session the current session.
+    * @return user welcome message.
+    */
+  private def processLogin(name: String, session: Session) = {
+    session.setCurrentUser(name)
+    if !accountSvc.isAccountExisting(name) then accountSvc.addAccount(name, accountSvc.defaultBalance)
+    "Hola, " + name + "!"
+  }
+
+  /**
+    * Processes an order request.
+    * @param request the order request.
+    * @param session the current session.
+    * @return if the user is logged in, returns the order response, otherwise a login invitation.
+    */
+  private def processOrder(request: ExprTree, session: Session): String = {
+    if session.getCurrentUser.isEmpty then
+      "Veuillez d'abord vous identifier."
+    else
+      val cost = computePrice(request)
+      "Voici donc " + reply(session)(request) + " ! Cela coûte CHF " + cost +
+        " et votre nouveau solde est de CHF " + accountSvc.purchase(session.getCurrentUser.get, cost) + "."
+  }
+
+  /**
+    * Processes a request for an account balance.
+    * @param session the current session.
+    * @return if the user is logged in, returns the user balance, otherwise a login invitation.
+    */
+  private def processSolde(session: Session): String = {
+    if session.getCurrentUser.isEmpty then
+      "Veuillez d'abord vous identifier."
+    else
+      "Le montant actuel de votre solde est de CHF " +
+        accountSvc.getAccountBalance(session.getCurrentUser.get) + "."
+  }
+
 end AnalyzerService

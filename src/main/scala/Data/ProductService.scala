@@ -19,7 +19,7 @@ trait ProductService:
 
 class ProductImpl extends ProductService:
   // TODO - Part 2 Step 2
-  val beers = Map(
+  private val beers = Map(
     ("boxer", 1.0),
     ("farmer", 1.0),
     ("wittekop", 2.0),
@@ -27,7 +27,7 @@ class ProductImpl extends ProductService:
     ("jackhammer", 3.0),
     ("tenebreuse", 4.0))
 
-  val croissants = Map(
+  private val croissants = Map(
     ("maison", 2.0),
     ("cailler", 2.0))
 
@@ -40,4 +40,5 @@ class ProductImpl extends ProductService:
     if (product == "biere") "boxer"
     else if (product == "croissant") "maison"
     else ""
+
 end ProductImpl

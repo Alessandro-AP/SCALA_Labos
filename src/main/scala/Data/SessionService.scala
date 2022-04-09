@@ -9,7 +9,6 @@ import scala.util.Random
 trait Session:
   val sid: String
   private var _currentUser: Option[String] = None
-  val defaultBalance: Double = 30.0
 
   def getCurrentUser: Option[String] = _currentUser
   def setCurrentUser(user: String): Unit = _currentUser = Some(user)
@@ -39,6 +38,7 @@ class SessionImpl extends SessionService:
     existingSessions(sid) = this
   override def exists(sid: String): Boolean = existingSessions.contains(sid)
   override def get(sid: String): Option[Session] = existingSessions.get(sid)
+  
 end SessionImpl
 
 
