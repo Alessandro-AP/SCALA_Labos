@@ -36,9 +36,6 @@ end SpellCheckerService
 
 class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellCheckerService:
 
-  // List of authorized words
-  private val dictionaryKeys = dictionary.keys.toVector
-
   def stringDistance(s1: String, s2: String): Int =
     def minimum(a: Int, b: Int, c: Int) = a min b min c
 
@@ -54,15 +51,12 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
     if (misspelledWord.charAt(0) == '_' || (misspelledWord forall Character.isDigit))
       misspelledWord
     else
-      // TODO change implementation (lab 1 correction)
-      var closestWord = (dictionaryKeys.head, stringDistance(dictionaryKeys.head, misspelledWord))
-
-      for (i <- 1 until dictionaryKeys.size)
-        val dist = stringDistance(dictionaryKeys(i), misspelledWord)
-
-        // For equal distance, we take the word that comes first in the alphabetical order.
-        if (dist == closestWord._2 && dictionaryKeys(i) < closestWord._1) || dist < closestWord._2
-        then closestWord = (dictionaryKeys(i), dist)
+      val closestWord = dictionary.keys.foldLeft(("",Int.MaxValue))((closestWord, key) => {
+        val dist = stringDistance(key,misspelledWord)
+        if (dist == closestWord._2 && key < closestWord._1) || dist < closestWord._2
+          then (key, dist)
+          else closestWord
+      })
 
       dictionary(closestWord._1)
 

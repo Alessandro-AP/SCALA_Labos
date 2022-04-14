@@ -16,7 +16,7 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     * @return A Tokenizer which allows iteration over the tokens of the input
     */
   def tokenize(input: String): Tokenized =
-    new TokenizedImpl(
+    TokenizedImpl(
       input.replaceAll("[-+/<>%&#$^~:@{}|.!?*]", "")
         .split("[\\s'’,;]+")
         .map(word => createToken(dictionary.getOrElse(word, spellCheckerSvc.getClosestWordInDictionary(word))))

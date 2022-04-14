@@ -29,5 +29,5 @@ object ClinksCalculator:
     * @param k the second number
     * @return n choose k
     */
-  def calculateCombination(n: Int, k: Int): Int = (factorial(n) / (factorial(k) * factorial(n - k))).toInt
+  def calculateCombination(n: Int, k: Int): Int = if k > n then 0 else (factorial(n) / (factorial(k) * factorial(n - k))).toInt
 end ClinksCalculator
