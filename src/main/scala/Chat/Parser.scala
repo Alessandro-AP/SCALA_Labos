@@ -38,9 +38,9 @@ class Parser(tokenized: Tokenized):
     if curToken == JE then
       readToken()
       curToken match {
-        case ETRE => parseToBeOrNotToBe
-        case VOULOIR => parseAction
-        case ME => parsePseudoByCall
+        case ETRE => parseToBeOrNotToBe()
+        case VOULOIR => parseAction()
+        case ME => parsePseudoByCall()
         case _ => expected(ETRE, VOULOIR, ME)
       }
     else
@@ -49,19 +49,18 @@ class Parser(tokenized: Tokenized):
   /**
     * Parses a user action.
     */
-  private def parseAction = {
+  private def parseAction(): ExprTree =
     readToken()
     curToken match {
-      case COMMANDER => parseOrder
-      case CONNAITRE => parseSolde
+      case COMMANDER => parseOrder()
+      case CONNAITRE => parseSolde()
       case _ => expected(COMMANDER, CONNAITRE)
     }
-  }
 
   /**
     * Parses the user state of mind or it's pseudo.
     */
-  private def parseToBeOrNotToBe = {
+  private def parseToBeOrNotToBe(): ExprTree =
     readToken()
     curToken match {
       case ASSOIFFE =>
@@ -73,41 +72,31 @@ class Parser(tokenized: Tokenized):
       case PSEUDO => Login(eat(PSEUDO).replace("_", ""))
       case _ => expected(ASSOIFFE, AFFAME, PSEUDO)
     }
-  }
 
   /**
     * Parses a balance account request.
     */
-  private def parseSolde = {
+  private def parseSolde(): ExprTree =
     readToken()
     eat(MON)
     eat(SOLDE)
     Solde()
-  }
 
   /**
     * Parses a products order.
     */
-  private def parseOrder = {
+  private def parseOrder(): ExprTree =
     readToken()
     Order(parseMultiProductRequest(parseProductRequest()))
-  }
 
   /**
     * Parse a product request to generate either a ProductRequest node or a DefaultProductRequest node.
     */
   private def parseProductRequest(): ExprTree =
-    //    var brand : String = "" // TODO ? et un seul Noeud ProductRequest(quantity, productType, brand)
     val quantity = Integer.parseInt(eat(NUM))
     val productType = eat(PRODUCT)
-
-    if curToken == MARQUE then
-      val brand = eat(MARQUE)
-      ProductRequest(quantity, productType, brand)
-    else
-      DefaultProductRequest(quantity, productType)
-
-  end parseProductRequest
+    val brand = if curToken == MARQUE then Some(eat(MARQUE)) else None
+    ProductRequest(quantity, productType, brand)
 
   /**
     * Check if a ProductRequest is followed by more ProductRequest.
@@ -130,11 +119,10 @@ class Parser(tokenized: Tokenized):
   /**
     * Parses user identification by pseudo.
     */
-  private def parsePseudoByCall = {
+  private def parsePseudoByCall(): ExprTree =
     readToken()
     eat(APPELLE)
     Login(eat(PSEUDO).replace("_", ""))
-  }
 
   /**
     * Parses product(s) price demand and return a Price node.

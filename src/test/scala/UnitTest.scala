@@ -81,7 +81,7 @@ class UnitTest extends AnyFlatSpec with Matchers {
     actual shouldBe expected
   }
 
-  it should "process mutliple users" in {
+  it should "process multiple users" in {
     var req = "Bonjour, je m'appelle _Bob."
     var tokenized = tokenizerSvc.tokenize(req.toLowerCase)
     var expr = Parser(tokenized).parsePhrases()
