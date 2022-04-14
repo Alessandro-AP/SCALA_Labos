@@ -25,6 +25,7 @@ object MainParser:
         case "santé !" =>
           for i <- 2 to 6 do
             println(s"Nombre de *clinks* pour un santé de $i personnes : ${ClinksCalculator.calculateCombination(i, 2)}.")
+        case "" => println("Veuillez entrer quelque chose")
         case s =>
           try
             val tokenized = tokenizerSvc.tokenize(s)

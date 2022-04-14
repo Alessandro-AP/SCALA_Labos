@@ -55,7 +55,7 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     case "et" => ET
     case "ou" => OU
     case "EOL" => EOL
-    case _ if word.charAt(0) == '_' => PSEUDO
+    case _ if word.startsWith("_") => PSEUDO
     case _ if word forall Character.isDigit => NUM
     case _ => UNKNOWN
   }

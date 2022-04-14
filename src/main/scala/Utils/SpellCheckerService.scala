@@ -48,7 +48,7 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
     levenshtein(s1.toList, s2.toList)
 
   def getClosestWordInDictionary(misspelledWord: String): String =
-    if (misspelledWord.charAt(0) == '_' || (misspelledWord forall Character.isDigit))
+    if (misspelledWord.startsWith("_") || (misspelledWord forall Character.isDigit))
       misspelledWord
     else
       val closestWord = dictionary.keys.foldLeft(("",Int.MaxValue))((closestWord, key) => {
