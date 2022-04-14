@@ -1,1 +1,1 @@
-# SCALA_Labo1
+# SCALA_Labos
