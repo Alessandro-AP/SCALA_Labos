@@ -12,10 +12,8 @@ class AnalyzerService(productSvc: ProductService,
     */
   // TODO - Part 2 Step 3
   def computePrice(t: ExprTree): Double = t match {
-    case DefaultProductRequest(quantity, productType) =>
-      quantity * productSvc.getPrice(productType, productSvc.getDefaultBrand(productType))
     case ProductRequest(quantity, productType, brand) =>
-      quantity * productSvc.getPrice(productType, brand)
+      quantity * productSvc.getPrice(productType, brand.getOrElse(productSvc.getDefaultBrand(productType)))
     case And(left, right) => computePrice(left) + computePrice(right)
     case Or(left, right) => Math.min(computePrice(left), computePrice(right))
     case Price(request) => computePrice(request)
@@ -38,10 +36,10 @@ class AnalyzerService(productSvc: ProductService,
       // Identification
       case Login(name) => processLogin(name, session)
       // Orders & products
-      case ProductRequest(quantity, productType, brand) => quantity.toString + " " + productType + " " + brand // TODO afficher seulement le productType pour les croissants comme dans donnée ou on s'en fout car libre et if else dégueux?
-      case DefaultProductRequest(quantity, productType) => quantity.toString + " " + productType + " " + productSvc.getDefaultBrand(productType)
+// TODO afficher seulement le productType pour les croissants comme dans donnée ou on s'en fout car libre et if else dégueux?
+      case ProductRequest(quantity, productType, brand) => s"${quantity.toString} $productType ${brand.getOrElse(productSvc.getDefaultBrand(productType))}"
       case Order(request) => processOrder(request, session)
-      case Price(request) => "Cela coûte CHF " + computePrice(request) + "."
+      case Price(request) => s"Cela coûte CHF ${computePrice(request)}."
       case Solde() => processSolde(session)
       // Logical op
       case Or(left, right) => if computePrice(left) <= computePrice(right) then inner(left) else inner(right)
@@ -58,7 +56,7 @@ class AnalyzerService(productSvc: ProductService,
   private def processLogin(name: String, session: Session) = {
     session.setCurrentUser(name)
     if !accountSvc.isAccountExisting(name) then accountSvc.addAccount(name, accountSvc.defaultBalance)
-    "Hola, " + name + "!"
+    s"Hola, $name!"
   }
 
   /**
@@ -72,8 +70,8 @@ class AnalyzerService(productSvc: ProductService,
       "Veuillez d'abord vous identifier."
     else
       val cost = computePrice(request)
-      "Voici donc " + reply(session)(request) + " ! Cela coûte CHF " + cost +
-        " et votre nouveau solde est de CHF " + accountSvc.purchase(session.getCurrentUser.get, cost) + "."
+      s"Voici donc ${reply(session)(request)} ! Cela coûte CHF $cost et " +
+        s"votre nouveau solde est de CHF ${accountSvc.purchase(session.getCurrentUser.get, cost)}."
   }
 
   /**
@@ -85,8 +83,7 @@ class AnalyzerService(productSvc: ProductService,
     if session.getCurrentUser.isEmpty then
       "Veuillez d'abord vous identifier."
     else
-      "Le montant actuel de votre solde est de CHF " +
-        accountSvc.getAccountBalance(session.getCurrentUser.get) + "."
+      s"Le montant actuel de votre solde est de CHF ${accountSvc.getAccountBalance(session.getCurrentUser.get)}."
   }
 
 end AnalyzerService
