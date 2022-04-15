@@ -105,7 +105,6 @@ class Parser(tokenized: Tokenized):
     */
   @tailrec
   private def parseMultiProductRequest(req: ExprTree): ExprTree = curToken match {
-    // TODO stocker req inside au lieu du param ? car est tjs = à parseProductRequest()
       case ET =>
         readToken()
         parseMultiProductRequest(And(req, parseProductRequest()))
