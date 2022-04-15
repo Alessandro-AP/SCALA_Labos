@@ -36,7 +36,6 @@ class AnalyzerService(productSvc: ProductService,
       // Identification
       case Login(name) => processLogin(name, session)
       // Orders & products
-// TODO afficher seulement le productType pour les croissants comme dans donnée ou on s'en fout car libre et if else dégueux?
       case ProductRequest(quantity, productType, brand) => s"${quantity.toString} $productType ${brand.getOrElse(productSvc.getDefaultBrand(productType))}"
       case Order(request) => processOrder(request, session)
       case Price(request) => s"Cela coûte CHF ${computePrice(request)}."
@@ -46,44 +45,43 @@ class AnalyzerService(productSvc: ProductService,
       case And(left, right) => inner(left) + " et " + inner(right)
 
   end reply
-
+  
+  val askForAuth = "Veuillez d'abord vous identifier."
+  
   /**
-    * Processes a login request.
+    * Processes a login request and adds a user to the account service if needed.
     * @param name the user name.
     * @param session the current session.
     * @return user welcome message.
     */
-  private def processLogin(name: String, session: Session) = {
+  private def processLogin(name: String, session: Session): String =
     session.setCurrentUser(name)
     if !accountSvc.isAccountExisting(name) then accountSvc.addAccount(name, accountSvc.defaultBalance)
     s"Hola, $name!"
-  }
 
   /**
-    * Processes an order request.
+    * Processes an order request, updating a user account balance.
     * @param request the order request.
     * @param session the current session.
     * @return if the user is logged in, returns the order response, otherwise a login invitation.
     */
-  private def processOrder(request: ExprTree, session: Session): String = {
+  private def processOrder(request: ExprTree, session: Session): String =
     if session.getCurrentUser.isEmpty then
-      "Veuillez d'abord vous identifier."
+      askForAuth
     else
       val cost = computePrice(request)
       s"Voici donc ${reply(session)(request)} ! Cela coûte CHF $cost et " +
         s"votre nouveau solde est de CHF ${accountSvc.purchase(session.getCurrentUser.get, cost)}."
-  }
 
   /**
-    * Processes a request for an account balance.
+    * Processes a request for an user account balance.
     * @param session the current session.
     * @return if the user is logged in, returns the user balance, otherwise a login invitation.
     */
-  private def processSolde(session: Session): String = {
+  private def processSolde(session: Session): String =
     if session.getCurrentUser.isEmpty then
-      "Veuillez d'abord vous identifier."
+      askForAuth
     else
       s"Le montant actuel de votre solde est de CHF ${accountSvc.getAccountBalance(session.getCurrentUser.get)}."
-  }
 
 end AnalyzerService

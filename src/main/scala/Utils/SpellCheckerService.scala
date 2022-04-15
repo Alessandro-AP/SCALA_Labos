@@ -42,7 +42,7 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
     def levenshtein(s1: List[Char], s2: List[Char]): Int = (s1, s2) match {
       case (_, Nil) => s1.length
       case (Nil, _) => s2.length
-      case (h1::t1, h2::t2) if (h1 == h2) => levenshtein(t1, t2)
+      case (h1::t1, h2::t2) if h1 == h2 => levenshtein(t1, t2)
       case (h1::t1, h2::t2) => 1 + minimum(levenshtein(t1, s2), levenshtein(s1, t2), levenshtein(t1, t2))
     }
     levenshtein(s1.toList, s2.toList)
@@ -51,13 +51,11 @@ class SpellCheckerImpl(val dictionary: Map[String, String]) extends SpellChecker
     if (misspelledWord.startsWith("_") || (misspelledWord forall Character.isDigit))
       misspelledWord
     else
-      val closestWord = dictionary.keys.foldLeft(("",Int.MaxValue))((closestWord, key) => {
-        val dist = stringDistance(key,misspelledWord)
-        if (dist == closestWord._2 && key < closestWord._1) || dist < closestWord._2
-          then (key, dist)
-          else closestWord
-      })
-
+      val closestWord = dictionary.keys.foldLeft(("", Int.MaxValue))((closestWord, key) =>
+        val dist = stringDistance(key, misspelledWord)
+        if (dist == closestWord._2 && key < closestWord._1) || dist < closestWord._2 then (key, dist)
+        else closestWord
+      )
       dictionary(closestWord._1)
 
 end SpellCheckerImpl

@@ -17,7 +17,6 @@ object ExprTree:
   case class Login(name: String) extends ExprTree
 
   case class ProductRequest(quantity: Int, productType: String, brand: Option[String]) extends ExprTree
-//  case class DefaultProductRequest(quantity: Int, productType: String) extends ExprTree
   case class Order(request: ExprTree) extends ExprTree
   case class Price(request: ExprTree) extends ExprTree
   case class Solde() extends ExprTree
