@@ -1,3 +1,7 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 import org.scalatest._
 import flatspec.AnyFlatSpec
 import matchers.should._

@@ -1,3 +1,7 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 package Data
 
 trait ProductService:
@@ -18,8 +22,7 @@ trait ProductService:
   def getDefaultBrand(product: ProductName): BrandName
 
 class ProductImpl extends ProductService:
-  // TODO - Part 2 Step 2
-  private val beers = Map(
+  private val beers : Map[String, Double] = Map(
     ("boxer", 1.0),
     ("farmer", 1.0),
     ("wittekop", 2.0),
@@ -27,7 +30,7 @@ class ProductImpl extends ProductService:
     ("jackhammer", 3.0),
     ("tenebreuse", 4.0))
 
-  private val croissants = Map(
+  private val croissants : Map[String, Double] = Map(
     ("maison", 2.0),
     ("cailler", 2.0))
 

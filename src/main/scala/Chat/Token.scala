@@ -1,8 +1,12 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 package Chat
 
 enum Token:
-     case // Terms
-     // TODO - Part 2 Step 1
+     case 
+     // Terms
      BONJOUR,
      JE,
      ME,

@@ -1,3 +1,7 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 package Data
 
 import scala.collection.mutable
@@ -37,13 +41,14 @@ trait AccountService:
 class AccountImpl extends AccountService:
   private val accounts: mutable.Map[String, Double] = mutable.Map()
 
-  // TODO - Part 2 Step 2
   def getAccountBalance(user: String): Double = accounts getOrElse (user, 0.0)
 
   def addAccount(user: String, balance: Double): Unit = accounts += (user -> balance)
 
   def isAccountExisting(user: String): Boolean = accounts contains user
-
+  
+  // TODO Check that account exist before purchase??
+  // TODO Maybe user is in session but not in accounts Map.
   def purchase(user: String, amount: Double): Double =
     val newBalance = accounts(user) - amount
     accounts(user) = newBalance

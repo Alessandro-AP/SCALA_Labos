@@ -1,16 +1,22 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 package Chat
 import Data.{AccountService, ProductService, Session}
 
 class AnalyzerService(productSvc: ProductService,
                       accountSvc: AccountService):
   import ExprTree._
+
+  val askForAuth = "Veuillez d'abord vous identifier."
+
   /**
     * Compute the price of the current node, then returns it. If the node is not a computational node, the method
     * returns 0.0.
     * For example if we had a "+" node, we would add the values of its two children, then return the result.
     * @return the result of the computation
     */
-  // TODO - Part 2 Step 3
   def computePrice(t: ExprTree): Double = t match {
     case ProductRequest(quantity, productType, brand) =>
       quantity * productSvc.getPrice(productType, brand.getOrElse(productSvc.getDefaultBrand(productType)))
@@ -26,10 +32,9 @@ class AnalyzerService(productSvc: ProductService,
     * @return the output text of the current node
     */
   def reply(session: Session)(t: ExprTree): String =
-    // you can use this to avoid having to pass the session when doing recursion
+    // You can use this to avoid having to pass the session when doing recursion
     val inner: ExprTree => String = reply(session)
     t match
-      // TODO - Part 2 Step 3
       // Example cases
       case Thirsty() => "Eh bien, la chance est de votre côté, car nous offrons les meilleures bières de la région !"
       case Hungry() => "Pas de soucis, nous pouvons notamment vous offrir des croissants faits maisons !"
@@ -39,15 +44,11 @@ class AnalyzerService(productSvc: ProductService,
       case ProductRequest(quantity, productType, brand) => s"${quantity.toString} $productType ${brand.getOrElse(productSvc.getDefaultBrand(productType))}"
       case Order(request) => processOrder(request, session)
       case Price(request) => s"Cela coûte CHF ${computePrice(request)}."
-      case Solde() => processSolde(session)
+      case Balance() => processSolde(session)
       // Logical op
       case Or(left, right) => if computePrice(left) <= computePrice(right) then inner(left) else inner(right)
       case And(left, right) => inner(left) + " et " + inner(right)
 
-  end reply
-  
-  val askForAuth = "Veuillez d'abord vous identifier."
-  
   /**
     * Processes a login request and adds a user to the account service if needed.
     * @param name the user name.

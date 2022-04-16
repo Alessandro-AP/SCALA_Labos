@@ -1,3 +1,7 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 package Data
 
 import scala.collection.mutable

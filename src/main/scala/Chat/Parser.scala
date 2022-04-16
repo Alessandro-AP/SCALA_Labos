@@ -1,10 +1,13 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 package Chat
 
 import scala.annotation.tailrec
 
 class UnexpectedTokenException(msg: String) extends Exception(msg) {}
 
-// TODO - step 4
 class Parser(tokenized: Tokenized):
   import ExprTree._
   import Chat.Token._
@@ -31,8 +34,7 @@ class Parser(tokenized: Tokenized):
     val expectedTokens = more.prepended(token).mkString(" or ")
     throw new UnexpectedTokenException(s"Expected: $expectedTokens, found: $curToken")
 
-  /** the root method of the parser: parses an entry phrase */
-  // TODO - Part 2 Step 4
+  /** The root method of the parser: parses an entry phrase */
   def parsePhrases(): ExprTree =
     if curToken == BONJOUR then readToken()
     if curToken == JE then
@@ -80,7 +82,7 @@ class Parser(tokenized: Tokenized):
     readToken()
     eat(MON)
     eat(SOLDE)
-    Solde()
+    Balance()
 
   /**
     * Parses a products order.
@@ -113,7 +115,6 @@ class Parser(tokenized: Tokenized):
         parseMultiProductRequest(Or(req, parseProductRequest()))
       case _ => req
     }
-  end parseMultiProductRequest
 
   /**
     * Parses user identification by pseudo.
@@ -139,5 +140,5 @@ class Parser(tokenized: Tokenized):
     else expected(COMBIEN, QUEL, JE)
 
     Price(parseMultiProductRequest(parseProductRequest()))
-
-  end parsePriceDemand
+    
+end Parser

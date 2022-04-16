@@ -1,6 +1,6 @@
-// SCALA - Labo 1
+// SCALA - Labo 2
 // Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
-// Date: 27.03.22
+// Date: 16.04.22
 
 package Chat
 

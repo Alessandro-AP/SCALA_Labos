@@ -1,3 +1,7 @@
+// SCALA - Labo 2
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 16.04.22
+
 package Utils
 
 /**
@@ -21,7 +25,7 @@ object Dictionary:
     "aimerais" -> "vouloir",
     "assoiffé" -> "assoiffe",
     "assoiffée" -> "assoiffe",
-    "affamé" -> "affame",
+    "affamé" -> "affame", // TODO il faut paut utiliser "affamer"?? Check verbes
     "affamée" -> "affame",
     "bière" -> "biere",
     "bières" -> "biere",
@@ -46,7 +50,7 @@ object Dictionary:
     "connaître" -> "connaitre",
     "solde" -> "solde",
     "combien" -> "combien",
-    "coûte" -> "coute",
+    "coûte" -> "coute", // TODO il faut paut utiliser "couter"??
     "coûtent" -> "coute",
     "quel" -> "quel",
     "le" -> "le",
