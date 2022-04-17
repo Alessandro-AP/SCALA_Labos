@@ -46,9 +46,9 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     case "commander" => COMMANDER
     case "solde" => SOLDE
     case "combien" => COMBIEN
-    case "coute" | "prix" => PRIX
+    case "couter" | "prix" => PRIX
     case "etre" => ETRE
-    case "appelle" => APPELLE
+    case "appeler" => APPELER
     case "vouloir" => VOULOIR
     case "biere" | "croissant" => PRODUCT
     case "maison" | "cailler" | "farmer" | "boxer" | "wittekop" | "punkipa" | "jackhammer" | "tenebreuse" => MARQUE

@@ -17,7 +17,7 @@ object Dictionary:
     "yo" -> "bonjour",
     "je" -> "je",
     "j" -> "je",
-    "appelle" -> "appelle",
+    "appelle" -> "appeler",
     "suis" -> "etre",
     "est" -> "etre",
     "veux" -> "vouloir",
@@ -25,7 +25,7 @@ object Dictionary:
     "aimerais" -> "vouloir",
     "assoiffé" -> "assoiffe",
     "assoiffée" -> "assoiffe",
-    "affamé" -> "affame", // TODO il faut paut utiliser "affamer"?? Check verbes
+    "affamé" -> "affame",
     "affamée" -> "affame",
     "bière" -> "biere",
     "bières" -> "biere",
@@ -50,8 +50,8 @@ object Dictionary:
     "connaître" -> "connaitre",
     "solde" -> "solde",
     "combien" -> "combien",
-    "coûte" -> "coute", // TODO il faut paut utiliser "couter"??
-    "coûtent" -> "coute",
+    "coûte" -> "couter",
+    "coûtent" -> "couter",
     "quel" -> "quel",
     "le" -> "le",
     "l" -> "le",
