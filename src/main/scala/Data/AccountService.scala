@@ -47,9 +47,8 @@ class AccountImpl extends AccountService:
 
   def isAccountExisting(user: String): Boolean = accounts contains user
   
-  // TODO Check that account exist before purchase??
-  // TODO Maybe user is in session but not in accounts Map.
   def purchase(user: String, amount: Double): Double =
+    require(isAccountExisting(user), "User unknown!")
     val newBalance = accounts(user) - amount
     accounts(user) = newBalance
     newBalance

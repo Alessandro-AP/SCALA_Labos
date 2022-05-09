@@ -121,7 +121,7 @@ class Parser(tokenized: Tokenized):
     */
   private def parsePseudoByCall(): ExprTree =
     readToken()
-    eat(APPELLE)
+    eat(APPELER)
     Login(eat(PSEUDO).replace("_", ""))
 
   /**
