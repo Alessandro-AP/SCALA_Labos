@@ -1,3 +1,7 @@
+// SCALA - Labo 3
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 09.05.22
+
 package Web
 
 /**
