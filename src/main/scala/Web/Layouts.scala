@@ -4,8 +4,8 @@
 
 package Web
 
-import scalatags.Text.all._
-import scalatags.Text.tags2
+import scalatags.Text.all.*
+import scalatags.Text.tags2.nav
 
 /**
   * Assembles the method used to layout ScalaTags
@@ -22,12 +22,27 @@ object Layouts:
           href := "static/css/main.css"
         ),
         script(src := "static/js/main.js"),
-
       ),
-      body(margin := 0, backgroundColor := "#f8f8f8")(
-        div(
-          h1(id := "title", "This is a title"),
-          p("This is a big paragraph of text")
+      body(
+        nav(
+          a(cls := "nav-brand","Bot-tender"),
+          div(cls := "nav-item",
+            a(href := "/login", "Log in"),
+          )
+        ),
+        div(cls := "content",
+          div(id := "boardMessage",
+            div(cls := "msg",
+              span(cls := "author"),
+              div(cls := "msg-content", "Please wait, the messages are loading !")
+            )
+          ),
+          form(id := "msgForm", onsubmit := "submitMessageForm();return false",
+            div(id := "errorDiv", cls := "errorMsg"),
+            label(`for` := "messageInput", "Your message: "),
+            input(`type` := "text", id := "messageInput", placeholder := "Write your message"),
+            input(`type` := "submit", value := "Envoyer")
+          )
         )
       )
     )
