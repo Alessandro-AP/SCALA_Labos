@@ -25,10 +25,20 @@ class UsersRoutes(accountSvc: AccountService,
     // TODO - Part 3 Step 3b: Process the login information sent by the form with POST to `/login`,
     //      set the user in the provided session (if the user exists) and display a successful or
     //      failed login page.
-//    @getSession(sessionSvc)
-//    @cask.postForm("/login")
-//    def postLogin(username: String)(session: Session) =
-//        Layouts.login
+
+    @getSession(sessionSvc)
+    @cask.postForm("/login")
+    def postLogin(username: String)(session: Session) =
+      println("")
+      if (accountSvc.isAccountExisting(username)) {
+        session.setCurrentUser(username)
+        Layouts.successPage
+//        cask.Redirect("/success")
+      }
+      else {
+        Layouts.login(StatusCode.LoginError)
+      }
+    end postLogin
 
     // TODO - Part 3 Step 3c: Process the register information sent by the form with POST to `/register`,
     //      create the user, set the user in the provided session and display a successful
