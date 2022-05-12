@@ -35,7 +35,7 @@ object Layouts:
     )
   }
 
-  private def pageLayout(content: Text.Modifier) =
+  private def pageLayout(content: scalatags.Text.Modifier) =
     html(
       headLayout,
       body(
@@ -44,7 +44,7 @@ object Layouts:
       )
     )
 
-  def homepage: Any = {
+  def homepage = {
     pageLayout(homepageContent)
   }
 
@@ -65,37 +65,29 @@ object Layouts:
     )
   }
 
-  def login: Any = {
-    pageLayout(loginPage)
-  }
-
-  private def loginPage = {
-    div(
-      loginContent,
-      registerContent
-    )
+  def login = {
+    pageLayout(loginContent)
   }
 
   private def loginContent = {
-    div(
-      p(fontWeight := "bold")("Login"),
-      form(id := "loginForm", onsubmit := "submitLoginForm();return false")(
-        div(id := "errorDiv", cls := "errorMsg"),
-        label(`for` := "usernameInput")("Username: "),
-        input(`type` := "text", id := "usernameInput", placeholder := "Write your username"),
-        input(`type` := "submit", value := "Envoyer")
-      )
-    )
-  }
-
-  private def registerContent = {
-    div(
-      p(fontWeight := "bold")("Register"),
-      form(id := "registerForm", onsubmit := "submitRegisterForm();return false")(
-        div(id := "errorDiv", cls := "errorMsg"),
-        label(`for` := "usernameInput")("Username: "),
-        input(`type` := "text", id := "usernameInput", placeholder := "Write your username"),
-        input(`type` := "submit", value := "Envoyer")
+    div(cls := "content")(
+      div(
+        p(fontWeight := "bold", fontSize := "24px")("Login"),
+        form(id := "loginForm", action := "/login", method := "post")(
+          div(id := "errorDiv", cls := "errorMsg"),
+          label(`for` := "usernameInput")("Username: "),
+          input(`type` := "text", id := "usernameInput", placeholder := "Write your username"),
+          input(`type` := "submit", value := "Envoyer")
+        )
+      ),
+      div(
+        p(fontWeight := "bold", fontSize := "24px")("Register"),
+        form(id := "registerForm", action := "/register", method := "post")(
+          div(id := "errorDiv", cls := "errorMsg"),
+          label(`for` := "usernameInput")("Username: "),
+          input(`type` := "text", id := "usernameInput", placeholder := "Write your username"),
+          input(`type` := "submit", value := "Envoyer")
+        )
       )
     )
   }

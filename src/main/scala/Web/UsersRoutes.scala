@@ -4,8 +4,7 @@
 
 package Web
 
-import Data.{AccountService, Session, SessionService}
-import Web.Decorators.getSession
+import Data.{AccountService, SessionService, Session}
 
 /**
   * Assembles the routes dealing with the users:
@@ -19,15 +18,18 @@ import Web.Decorators.getSession
 class UsersRoutes(accountSvc: AccountService,
                   sessionSvc: SessionService)(implicit val log: cask.Logger) extends cask.Routes:
     // TODO - Part 3 Step 3a: Display a login form and register form page for the following URL: `/login`.
-    @getSession(sessionSvc)
     @cask.get("/login")
-    def login()(session: Session) =
+    def login() =
         Layouts.login
 
     // TODO - Part 3 Step 3b: Process the login information sent by the form with POST to `/login`,
     //      set the user in the provided session (if the user exists) and display a successful or
     //      failed login page.
-    //
+//    @getSession(sessionSvc)
+//    @cask.postForm("/login")
+//    def postLogin(username: String)(session: Session) =
+//        Layouts.login
+
     // TODO - Part 3 Step 3c: Process the register information sent by the form with POST to `/register`,
     //      create the user, set the user in the provided session and display a successful
     //      register page.
