@@ -22,14 +22,21 @@ class UsersRoutes(accountSvc: AccountService,
     import Decorators.getSession
 
     // TODO - Part 3 Step 3a: Display a login form and register form page for the following URL: `/login`.
-
+    @getSession(sessionSvc)
     @cask.get("/login")
-    def login() =
-      Layouts.login(StatusCode.OK)
+    def login()(session: Session) =
+      Layouts.login(StatusCode.OK, session.getCurrentUser)
 
     // TODO - Part 3 Step 3b: Process the login information sent by the form with POST to `/login`,
     //      set the user in the provided session (if the user exists) and display a successful or
     //      failed login page.
+
+    @getSession(sessionSvc)
+    @cask.get("/logout")
+    def logout()(session: Session) =
+      if(session.getCurrentUser.isDefined)
+        session.reset()
+      Layouts.successPage(session.getCurrentUser)
 
     @getSession(sessionSvc)
     @cask.postForm("/login")
@@ -37,11 +44,11 @@ class UsersRoutes(accountSvc: AccountService,
       println("")
       if (accountSvc.isAccountExisting(username)) {
         session.setCurrentUser(username)
-        Layouts.successPage
+        Layouts.successPage(session.getCurrentUser)
 //        cask.Redirect("/success")
       }
       else {
-        Layouts.login(StatusCode.LoginError)
+        Layouts.login(StatusCode.LoginError, session.getCurrentUser)
       }
     end postLogin
 
@@ -53,12 +60,12 @@ class UsersRoutes(accountSvc: AccountService,
     @cask.postForm("/register")
     def postRegister(username: String)(session: Session) =
       if (accountSvc.isAccountExisting(username)) {
-        Layouts.login(StatusCode.RegisterError)
+        Layouts.login(StatusCode.RegisterError, session.getCurrentUser)
       }
       else {
         accountSvc.addAccount(username, accountSvc.defaultBalance)
         session.setCurrentUser(username)
-        Layouts.successPage
+        Layouts.successPage(session.getCurrentUser)
 //        cask.Redirect("/success")
       }
     end postRegister

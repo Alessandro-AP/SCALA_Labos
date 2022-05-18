@@ -28,7 +28,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
         // TODO - Part 3 Step 2: Display the home page (with the message board and the form to send new messages)
         session.getCurrentUser.map(u => s"You are logged in as ${u} !")
           .getOrElse("You are not logged in !")
-        Layouts.homepage
+        Layouts.homepage(session.getCurrentUser)
 
 
 

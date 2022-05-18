@@ -15,6 +15,7 @@ import Utils.StatusCode
 object Layouts:
   // You can use it to store your methods to generate ScalaTags.
 
+
   private def headLayout = {
     head(
       meta(charset := "utf-8"),
@@ -27,26 +28,27 @@ object Layouts:
     )
   }
 
-  private def navBarLayout = {
+  private def navBarLayout(username : Option[String]) = {
     nav(
       a(cls := "nav-brand")("Bot-tender"),
       div(cls := "nav-item")(
-        a(href := "/login")("Log in"),
+       if (username.isDefined) div( p(display:= "inline", margin := "6px")(s"Hello ${username.get}"), a(href := "/logout")("Logout"))
+       else a(href := "/login")("Log in"),
       )
     )
   }
 
-  private def pageLayout(content: scalatags.Text.Modifier) =
+  private def pageLayout(content: scalatags.Text.Modifier, username : Option[String]) =
     html(
       headLayout,
       body(
-        navBarLayout,
+        navBarLayout(username),
         content
       )
     )
 
-  def homepage = {
-    pageLayout(homepageContent)
+  def homepage(username : Option[String]) = {
+    pageLayout(homepageContent, username)
   }
 
   private def homepageContent = {
@@ -66,8 +68,8 @@ object Layouts:
     )
   }
 
-  def login(statusCode: StatusCode) = {
-    pageLayout(loginContent(statusCode))
+  def login(statusCode: StatusCode, username : Option[String]) = {
+    pageLayout(loginContent(statusCode), username)
   }
 
   private def loginContent(statusCode: StatusCode) = {
@@ -97,12 +99,12 @@ object Layouts:
     )
   }
 
-  def successPage = {
+  def successPage(username : Option[String]) = {
     pageLayout(
       div(cls := "content", cls := "success")(
         p(cls := "title")("Bienvenue sur Bot-tinder, appuyez sur le bouton ci-dessous pour retourner au Chat !"),
         a(href := "/", cls := "button")("Back to Chat")
-      )
+      ), username
     )
   }
 
