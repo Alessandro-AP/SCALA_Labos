@@ -49,6 +49,12 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
     // TODO - Part 3 Step 4c: Process and store the new websocket connection made to `/subscribe`
     //
     // TODO - Part 3 Step 4d: Delete the message history when a GET is made to `/clearHistory`
+    @getSession(sessionSvc) // This decorator fills the `(session: Session)` part of the `index` method.
+    @cask.get("/")
+    def clearHistory()(session: Session) =
+        msgSvc.deleteHistory()
+        Layouts.homepage(session.getCurrentUser)
+
     //
     // TODO - Part 3 Step 5: Modify the code of step 4b to process the messages sent to the bot (message
     //      starts with `@bot `). This message and its reply from the bot will be added to the message

@@ -4,8 +4,9 @@
 
 package Web
 
+import Data.MessageService
 import scalatags.Text
-import scalatags.Text.all._
+import scalatags.Text.all.*
 import scalatags.Text.tags2.nav
 import Utils.StatusCode
 
@@ -47,16 +48,16 @@ object Layouts:
       )
     )
 
-  def homepage(username : Option[String]) = {
-    pageLayout(homepageContent, username)
+  def homepage(username : Option[String], msgSvc: MessageService) = {
+    pageLayout(homepageContent(msgSvc), username)
   }
 
-  private def homepageContent = {
+  private def homepageContent(msgSvc: MessageService) = {
     div(cls := "content")(
       div(id := "boardMessage")(
         div(cls := "msg")(
           span(cls := "author"),
-          span(cls := "msg-content")("Please wait, the messages are loading !")
+          span(cls := "msg-content")("Please wait, the messages are loading !") // TODO générer la liste avec msgSvc.getLatestMessages
         )
       ),
       form(id := "msgForm", onsubmit := "submitMessageForm();return false")(

@@ -67,12 +67,10 @@ class AnalyzerService(productSvc: ProductService,
     * @return if the user is logged in, returns the order response, otherwise a login invitation.
     */
   private def processOrder(request: ExprTree, session: Session): String =
-    if session.getCurrentUser.isEmpty then
-      askForAuth
-    else
+    session.getCurrentUser.map(u =>
       val cost = computePrice(request)
       s"Voici donc ${reply(session)(request)} ! Cela coûte CHF $cost et " +
-        s"votre nouveau solde est de CHF ${accountSvc.purchase(session.getCurrentUser.get, cost)}."
+        s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.").getOrElse(askForAuth)
 
   /**
     * Processes a request for an user account balance.
@@ -80,9 +78,6 @@ class AnalyzerService(productSvc: ProductService,
     * @return if the user is logged in, returns the user balance, otherwise a login invitation.
     */
   private def processSolde(session: Session): String =
-    if session.getCurrentUser.isEmpty then
-      askForAuth
-    else
-      s"Le montant actuel de votre solde est de CHF ${accountSvc.getAccountBalance(session.getCurrentUser.get)}."
+    session.getCurrentUser.map(u => s"Le montant actuel de votre solde est de CHF ${accountSvc.getAccountBalance(u)}.").getOrElse(askForAuth)
 
 end AnalyzerService
