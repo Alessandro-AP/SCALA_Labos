@@ -55,6 +55,12 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
     //      store together.
     //
     //      The exceptions raised by the `Parser` will be treated as an error (same as in step 4b)
+    @cask.postJson("send/")
+    def send( value1: ujson.Value, value2: Seq[Int]) =
+        println(s"VALUE1 : $value1")
+        println(s"VALUE2 : $value2")
+
+
 
     initialize()
 end MessagesRoutes

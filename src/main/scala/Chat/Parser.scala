@@ -137,7 +137,7 @@ class Parser(tokenized: Tokenized):
       eat(LE)
       eat(PRIX)
       eat(DE)
-    else expected(COMBIEN, QUEL, JE)
+    else expected(COMBIEN, QUEL, JE, BONJOUR)
 
     Price(parseMultiProductRequest(parseProductRequest()))
     

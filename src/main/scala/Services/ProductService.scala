@@ -42,6 +42,6 @@ class ProductImpl extends ProductService:
   def getDefaultBrand(product: ProductName): BrandName =
     if (product == "biere") "boxer"
     else if (product == "croissant") "maison"
-    else ""
+    else throw Exception("unknown product")
 
 end ProductImpl
