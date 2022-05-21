@@ -5,7 +5,10 @@
 package Web
 
 import Chat.{AnalyzerService, TokenizerService}
-import Data.{MessageService, AccountService, SessionService, Session}
+import Data.{AccountService, MessageService, Session, SessionService}
+
+import scala.collection.mutable.ListBuffer
+import castor.Context.Simple.global
 
 /**
   * Assembles the routes dealing with the message board:
@@ -28,8 +31,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
         // TODO - Part 3 Step 2: Display the home page (with the message board and the form to send new messages)
         session.getCurrentUser.map(u => s"You are logged in as ${u} !")
           .getOrElse("You are not logged in !")
-        Layouts.homepage(session.getCurrentUser)
-
+        Layouts.homepage(session.getCurrentUser, msgSvc)
 
 
     // TODO - Part 3 Step 4b: Process the new messages sent as JSON object to `/send`. The JSON looks
@@ -45,15 +47,35 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
     //      - The message is empty
     //
     //      If no error occurred, every other user is notified with the last 20 messages
-    //
+
+    @getSession(sessionSvc)
+    @cask.postJson("/send")
+    def send(msg: String)(session: Session) =
+        println(s"VALUE : $msg")
+        ujson.Obj("success" -> true, "err" -> "")
+
     // TODO - Part 3 Step 4c: Process and store the new websocket connection made to `/subscribe`
-    //
+    // Channels to every clients.
+    val clients =  ListBuffer[cask.endpoints.WsChannelActor]()
+
+    @cask.websocket("/subscribe")
+    def subscribe(): cask.WebsocketResult =
+        cask.WsHandler { channel =>
+            clients += channel
+            cask.WsActor {
+                case cask.Ws.Text("") => channel.send(cask.Ws.Close())
+                case cask.Ws.Text(data) =>
+                    channel.send(cask.Ws.Text(data))
+                case cask.Ws.Close(_, _) => clients -= channel
+            }
+        }
+
     // TODO - Part 3 Step 4d: Delete the message history when a GET is made to `/clearHistory`
     @getSession(sessionSvc) // This decorator fills the `(session: Session)` part of the `index` method.
-    @cask.get("/")
+    @cask.get("/clearHistory")
     def clearHistory()(session: Session) =
         msgSvc.deleteHistory()
-        Layouts.homepage(session.getCurrentUser)
+        Layouts.homepage(session.getCurrentUser, msgSvc)
 
     //
     // TODO - Part 3 Step 5: Modify the code of step 4b to process the messages sent to the bot (message
@@ -61,11 +83,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
     //      store together.
     //
     //      The exceptions raised by the `Parser` will be treated as an error (same as in step 4b)
-    @cask.postJson("send/")
-    def send( value1: ujson.Value, value2: Seq[Int]) =
-        println(s"VALUE1 : $value1")
-        println(s"VALUE2 : $value2")
-
+    
 
 
     initialize()
