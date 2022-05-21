@@ -13,6 +13,7 @@ import scala.collection.mutable.ListBuffer
 object MessageService:
     type Username = String
     type MsgContent = Frag
+    val MESSAGES_LIMIT = 20
 
 trait MessageService:
     /**
@@ -49,7 +50,7 @@ class MessageImpl extends MessageService:
         messages.prepend( (id,sender,msg,mention,exprType,replyToId) )
         id
 
-    override def getLatestMessages(n: Int) =
+    override def getLatestMessages(n: Int): Seq[(Username, MsgContent)] =
         messages.take(n).map(m => (m._2,m._3) ).toSeq
 
     override def deleteHistory(): Unit =

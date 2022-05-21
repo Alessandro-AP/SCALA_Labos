@@ -5,6 +5,7 @@
 package Web
 
 import Data.MessageService
+import Data.MessageService.{MsgContent, Username}
 import scalatags.Text
 import scalatags.Text.all.*
 import scalatags.Text.tags2.nav
@@ -14,8 +15,6 @@ import Utils.StatusCode
   * Assembles the method used to layout ScalaTags
   */
 object Layouts:
-  // You can use it to store your methods to generate ScalaTags.
-
 
   private def headLayout = {
     head(
@@ -39,7 +38,7 @@ object Layouts:
     )
   }
 
-  private def pageLayout(content: scalatags.Text.Modifier, username : Option[String]) =
+  private def pageLayout(content: scalatags.Text.Modifier, username : Option[String]) = {
     html(
       headLayout,
       body(
@@ -47,17 +46,32 @@ object Layouts:
         content
       )
     )
-
-  def homepage(username : Option[String], msgSvc: MessageService) = {
-    pageLayout(homepageContent(msgSvc), username)
   }
 
-  private def homepageContent(msgSvc: MessageService) = {
+  def homepage(username : Option[String]) = {
+    pageLayout(homepageContent(), username)
+  }
+
+  def msgContent(msg: String): Frag = {
+    span(cls := "msg-content")(msg)
+  }
+
+  def msgList(messages: Seq[(Username, MsgContent)]) = {
+    frag(
+      for ((author, msg) <- messages)
+      yield
+        div(cls := "msg")(
+          span(cls := "author")(author),
+          msg
+        )
+    )
+  }
+
+  private def homepageContent() = {
     div(cls := "content")(
       div(id := "boardMessage")(
         div(cls := "msg")(
-          span(cls := "author"),
-          span(cls := "msg-content")("Please wait, the messages are loading !") // TODO générer la liste avec msgSvc.getLatestMessages
+          span(cls := "msg-content")("Please wait, the messages are loading !")
         )
       ),
       form(id := "msgForm", onsubmit := "submitMessageForm();return false")(
@@ -78,34 +92,42 @@ object Layouts:
       div(
         p(cls := "title")("Login"),
         form(id := "loginForm", action := "/login", method := "post")(
-          if (statusCode == StatusCode.LoginError)
-            div(id := "errorDiv", cls := "errorMsg")("User not found !")
-          else div(display := "none"), // doesn't work without else
-          label(`for` := "usernameInput")("Username: "),
-          input(`type` := "text", id := "usernameInput", name := "username", placeholder := "Write your username"),
-          input(`type` := "submit", value := "Envoyer")
+          errorSection(statusCode, StatusCode.LoginError, "User not found !"),
+          loginInputs
         )
       ),
       div(
         p(cls := "title")("Register"),
         form(id := "registerForm", action := "/register", method := "post")(
-          if (statusCode == StatusCode.RegisterError)
-            div(id := "errorDiv", cls := "errorMsg")("User already exists, choose another username !")
-          else div(display := "none"), // doesn't work without else
-          label(`for` := "usernameInput")("Username: "),
-          input(`type` := "text", id := "usernameInput", name := "username", placeholder := "Write your username"),
-          input(`type` := "submit", value := "Envoyer")
+          errorSection(statusCode, StatusCode.RegisterError, "User already exists, choose another username !"),
+          loginInputs
         )
       )
     )
   }
 
-  def successPage(username : Option[String]) = {
+  private def loginInputs = {
+    frag(
+      label(`for` := "usernameInput")("Username: "),
+      input(`type` := "text", id := "usernameInput", name := "username", placeholder := "Write your username"),
+      input(`type` := "submit", value := "Envoyer")
+    )
+  }
+
+  private def errorSection(statusCode: StatusCode, checkCode: StatusCode, errorMsg: String) = {
+    if (statusCode == checkCode)
+      div(id := "errorDiv", cls := "errorMsg")(errorMsg)
+    else
+      div(display := "none") // doesn't work without else
+  }
+
+  def successPage(username: Option[String]) = {
     pageLayout(
       div(cls := "content", cls := "success")(
         p(cls := "title")("Bienvenue sur Bot-tinder, appuyez sur le bouton ci-dessous pour retourner au Chat !"),
         a(href := "/", cls := "button")("Back to Chat")
-      ), username
+      ),
+      username
     )
   }
 

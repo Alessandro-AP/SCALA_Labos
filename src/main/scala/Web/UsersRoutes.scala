@@ -21,22 +21,10 @@ class UsersRoutes(accountSvc: AccountService,
 
     import Decorators.getSession
 
-    // TODO - Part 3 Step 3a: Display a login form and register form page for the following URL: `/login`.
     @getSession(sessionSvc)
     @cask.get("/login")
     def login()(session: Session) =
       Layouts.login(StatusCode.OK, session.getCurrentUser)
-
-    // TODO - Part 3 Step 3b: Process the login information sent by the form with POST to `/login`,
-    //      set the user in the provided session (if the user exists) and display a successful or
-    //      failed login page.
-
-    @getSession(sessionSvc)
-    @cask.get("/logout")
-    def logout()(session: Session) =
-      if(session.getCurrentUser.isDefined)
-        session.reset()
-      Layouts.successPage(session.getCurrentUser)
 
     @getSession(sessionSvc)
     @cask.postForm("/login")
@@ -52,10 +40,6 @@ class UsersRoutes(accountSvc: AccountService,
       }
     end postLogin
 
-    // TODO - Part 3 Step 3c: Process the register information sent by the form with POST to `/register`,
-    //      create the user, set the user in the provided session and display a successful
-    //      register page.
-
     @getSession(sessionSvc)
     @cask.postForm("/register")
     def postRegister(username: String)(session: Session) =
@@ -70,10 +54,14 @@ class UsersRoutes(accountSvc: AccountService,
       }
     end postRegister
 
-    // TODO - Part 3 Step 3d: Reset the current session and display a successful logout page.
+    @getSession(sessionSvc)
+    @cask.get("/logout")
+    def logout()(session: Session) =
+      if(session.getCurrentUser.isDefined)
+        session.reset()
+      Layouts.successPage(session.getCurrentUser)
 
-
-//    @getSession(sessionSvc)
+  //    @getSession(sessionSvc)
 //    @cask.get("/success")
 //    def success()(session: Session) =
 //      Layouts.successPage
