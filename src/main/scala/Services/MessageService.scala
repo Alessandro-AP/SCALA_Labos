@@ -47,7 +47,7 @@ class MessageImpl extends MessageService:
 
     override def add(sender: Username, msg: MsgContent, mention: Option[Username] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None): Long =
         val id : Long = System.currentTimeMillis()
-        messages.prepend( (id,sender,msg,mention,exprType,replyToId) )
+        messages.append( (id,sender,msg,mention,exprType,replyToId) )
         id
 
     override def getLatestMessages(n: Int): Seq[(Username, MsgContent)] =

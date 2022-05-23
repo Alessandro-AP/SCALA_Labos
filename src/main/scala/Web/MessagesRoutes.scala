@@ -4,7 +4,7 @@
 
 package Web
 
-import Chat.{AnalyzerService, TokenizerService}
+import Chat.{AnalyzerService, Parser, TokenizerService, ExprTree}
 import Data.{AccountService, MessageService, Session, SessionService}
 
 import scala.collection.mutable.Set
@@ -31,7 +31,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
     @getSession(sessionSvc) // This decorator fills the `(session: Session)` part of the `index` method.
     @cask.get("/")
     def index()(session: Session) =
-        Layouts.homepage(session.getCurrentUser)
+        Layouts.homepage(session.getCurrentUser) //TODO shows messages first time that we connect to homepage???
 
 
     // TODO - Part 3 Step 4b: Process the new messages sent as JSON object to `/send`. The JSON looks
@@ -61,15 +61,43 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
     @cask.postJson("/send")
     def send(msg: String)(session: Session) =
         if msg.isBlank then ujson.Obj("success" -> false, "err" -> "Message cannot be empty or blank !")
-        else
-            session.getCurrentUser.map(user => {
-                msgSvc.add(user, Layouts.msgContent(msg) /*TODO manage other params*/)
-                openConnections.foreach(notifyNewMsg)
-                ujson.Obj("success" -> true, "err" -> "")
-            }).getOrElse(ujson.Obj("success" -> false, "err" -> "Please log in first !"))
+        else if session.getCurrentUser.isEmpty then  ujson.Obj("success" -> false, "err" -> "Please log in first !")
+        else if msg.startsWith("@") then
+            val mention = msg.substring(1, msg.indexOf(" "))
+            if mention == "bot" then
+                handleBot(msg, session)
+            else
+                sendMsg(session.getCurrentUser.get, msg, Some(mention))
+        else sendMsg(session.getCurrentUser.get, msg)
 
 
     // TODO - Part 3 Step 4c: Process and store the new websocket connection made to `/subscribe`
+
+    private def handleBot(msg: String, session: Session) = {
+        try{
+            val tokenized = tokenizerSvc.tokenize(msg.substring(4).trim.toLowerCase)
+            val expr = Parser(tokenized).parsePhrases()
+            sendMsg(session.getCurrentUser.get ,msg)
+            sendMsg("bot", analyzerSvc.reply(session)(expr))
+        }catch {
+            case _: Chat.UnexpectedTokenException => ujson.Obj("success" -> false, "err" -> "Invalid command!")
+        }
+
+    }
+
+    private def sendMsg(user: String, msg: String, mention: Option[String] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None) = {
+        msgSvc.add(user, Layouts.msgContent(msg), mention, exprType, replyToId)
+        openConnections.foreach(notifyNewMsg)
+        ujson.Obj("success" -> true, "err" -> "")
+    }
+
+//    private def sendMsg(msg: String, session: Session) = {
+//        session.getCurrentUser.map(user => { //TODO Map for Optional[String]?
+//            msgSvc.add(user, Layouts.msgContent(msg) /*TODO manage other params*/)
+//            openConnections.foreach(notifyNewMsg)
+//            ujson.Obj("success" -> true, "err" -> "")
+//        }).getOrElse(ujson.Obj("success" -> false, "err" -> "Please log in first !"))
+//    }
 
     @cask.websocket("/subscribe")
     def subscribe(): cask.WebsocketResult =
