@@ -4,7 +4,8 @@
 
 package Web
 
-import Chat.{AnalyzerService, Parser, TokenizerService, ExprTree}
+import Chat.{AnalyzerService, ExprTree, Parser, TokenizerService}
+import Data.MessageService.MESSAGES_LIMIT
 import Data.{AccountService, MessageService, Session, SessionService}
 
 import scala.collection.mutable.Set
@@ -18,8 +19,6 @@ import scala.collection.mutable
   * - One route to display the home page
   * - One route to send the new messages as JSON
   * - One route to subscribe with websocket to new messages
-  *
-  * @param log
   */
 class MessagesRoutes(tokenizerSvc: TokenizerService,
                      analyzerSvc: AnalyzerService,
@@ -28,105 +27,135 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
                      sessionSvc: SessionService)(implicit val log: cask.Logger) extends cask.Routes:
     import Decorators.getSession
 
-    @getSession(sessionSvc) // This decorator fills the `(session: Session)` part of the `index` method.
-    @cask.get("/")
-    def index()(session: Session) =
-        Layouts.homepage(session.getCurrentUser) //TODO shows messages first time that we connect to homepage???
-
-
-    // TODO - Part 3 Step 4b: Process the new messages sent as JSON object to `/send`. The JSON looks
-    //      like this: `{ "msg" : "The content of the message" }`.
-    //
-    //      A JSON object is returned. If an error occurred, it looks like this:
-    //      `{ "success" : false, "err" : "An error message that will be displayed" }`.
-    //      Otherwise (no error), it looks like this:
-    //      `{ "success" : true, "err" : "" }`
-    //
-    //      The following are treated as error:
-    //      - No user is logged in
-    //      - The message is empty
-    //
-    //      If no error occurred, every other user is notified with the last 20 messages
+    // Message constants
+    private val SUCCESS = "success"
+    private val ERR = "err"
+    private val ERR_NOT_BLANK = "Message cannot be empty or blank !"
+    private val ERR_LOGIN = "Please log in first !"
+    private val ERR_INVALID_CMD = "Invalid bot command!"
+    private val BOT = "Bot"
 
     // Websockets active connexions.
-    val openConnections =  mutable.Set.empty[cask.WsChannelActor]
+    private val openConnections =  mutable.Set.empty[cask.WsChannelActor]
 
-    def latestMessages(): String =
-        Layouts.msgList(msgSvc.getLatestMessages(MessageService.MESSAGES_LIMIT)).render
+    /**
+      * Display the home page (with the message board and the form to send new messages).
+      * @param session Current session
+      * @return Homepage
+      */
+    @getSession(sessionSvc) // This decorator fills the `(session: Session)` part of the `index` method.
+    @cask.get("/")
+    def index()(session: Session) = {
+        Layouts.homepage(session.getCurrentUser, msgSvc.getLatestMessages(MESSAGES_LIMIT))
+    }
 
-    def notifyNewMsg(channel: cask.WsChannelActor): Unit =
-        channel.send(cask.Ws.Text(latestMessages()))
-
+    /**
+      * Process the new messages sent as JSON object to `/send`.
+      * @param msg Message sent
+      * @param session Current session
+      * @return a JSON object indicating a success or a error with a message. 
+      *         Error in case of : 
+      *         - No user is logged in
+      *         - The message is empty
+      */
     @getSession(sessionSvc)
     @cask.postJson("/send")
-    def send(msg: String)(session: Session) =
-        if msg.isBlank then ujson.Obj("success" -> false, "err" -> "Message cannot be empty or blank !")
-        else if session.getCurrentUser.isEmpty then  ujson.Obj("success" -> false, "err" -> "Please log in first !")
-        else if msg.startsWith("@") then
-            val mention = msg.substring(1, msg.indexOf(" "))
-            if mention == "bot" then
-                handleBot(msg, session)
-            else
-                sendMsg(session.getCurrentUser.get, msg, Some(mention))
-        else sendMsg(session.getCurrentUser.get, msg)
+    def send(msg: String)(session: Session) = {
+        if msg.isBlank then ujson.Obj(SUCCESS -> false, ERR -> ERR_NOT_BLANK)
+        else if session.getCurrentUser.isEmpty then ujson.Obj(SUCCESS -> false, ERR -> ERR_LOGIN)
+        else if msg.startsWith("@") then handleMention(msg, session)
+        else notifyNewMsg(session.getCurrentUser.get, msg)
+    }
 
+    /**
+      * Process and store the new websocket connection made to `/subscribe`.
+      */
+    @cask.websocket("/subscribe")
+    def subscribe(): cask.WebsocketResult = {
+        cask.WsHandler { connection =>
+            openConnections += connection
+            cask.WsActor {
+                case cask.Ws.Text(_) => sendLatestMsg(connection)
+                case cask.Ws.Close(_, _) => openConnections -= connection
+            }
+        }
+    }
 
-    // TODO - Part 3 Step 4c: Process and store the new websocket connection made to `/subscribe`
+    /**
+      * Delete the message history when a GET is made to `/clearHistory`.
+      */
+    @getSession(sessionSvc)
+    @cask.get("/clearHistory")
+    def clearHistory()(session: Session) = {
+        msgSvc.deleteHistory()
+        Layouts.homepage(session.getCurrentUser)
+    }
 
+    /**
+      * @return The layout containing the list of the MESSAGES_LIMIT latest messages.
+      */
+    def latestMessages(): String = {
+        Layouts.msgList(msgSvc.getLatestMessages(MessageService.MESSAGES_LIMIT)).render
+    }
+
+    /**
+      * Send the MESSAGES_LIMIT latest messages on the provided connection.
+      * @param connection between two hosts
+      */
+    def sendLatestMsg(connection: cask.WsChannelActor): Unit = {
+        connection.send(cask.Ws.Text(latestMessages()))
+    }
+
+    /**
+      * Save an incoming message and notify all other users of the newest message.
+      * @param user Author of message
+      * @param msg Message
+      * @param mention Mention of a user or bot if provided
+      * @param exprType ExprTree of a command if provided
+      * @param replyToId User id to which we reply
+      * @return a JSON object indicating a success msg.
+      */
+    private def notifyNewMsg(user: String, msg: String, mention: Option[String] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None) = {
+        msgSvc.add(user, Layouts.msgContent(msg), mention, exprType, replyToId)
+        openConnections.foreach(sendLatestMsg)
+        ujson.Obj(SUCCESS -> true, ERR -> "")
+    }
+
+    /**
+      * When the message contains an @ it is treated as a mention.
+      * If the mention is addressed to the bot, it will process the message and provide a reply.
+      * Otherwise, a user is mentioned.
+      * 
+      * @param msg Message to be sent
+      * @param session Current Session
+      * @return a JSON object indicating a success or a error with a message.
+      */
+    private def handleMention(msg: String, session: Session) = {
+        val mention = msg.substring(1, msg.indexOf(" "))
+        if mention.toLowerCase == BOT.toLowerCase then
+            handleBot(msg, session)
+        else
+            notifyNewMsg(session.getCurrentUser.get, msg, Some(mention))
+    }
+
+    /**
+      * Process the messages sent to the bot. The message and its reply from the bot
+      * will be added to the message store together.
+      * @param msg Message sent to the bot
+      * @param session Current session
+      * @return a JSON object indicating a succes or a error with a message.
+      */
     private def handleBot(msg: String, session: Session) = {
         try{
             val tokenized = tokenizerSvc.tokenize(msg.substring(4).trim.toLowerCase)
             val expr = Parser(tokenized).parsePhrases()
             val id = msgSvc.add(session.getCurrentUser.get, Layouts.msgContent(msg))
-            openConnections.foreach(notifyNewMsg)
-            sendMsg("bot", analyzerSvc.reply(session)(expr),None, Some(expr), Some(id))
+            openConnections.foreach(sendLatestMsg)
+            notifyNewMsg(BOT, analyzerSvc.reply(session)(expr),None, Some(expr), Some(id))
         }catch {
-            case _: Chat.UnexpectedTokenException => ujson.Obj("success" -> false, "err" -> "Invalid command!")
+            case _: Chat.UnexpectedTokenException => ujson.Obj(SUCCESS -> false, ERR -> ERR_INVALID_CMD)
         }
-
     }
-
-    private def sendMsg(user: String, msg: String, mention: Option[String] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None) = {
-        msgSvc.add(user, Layouts.msgContent(msg), mention, exprType, replyToId)
-        openConnections.foreach(notifyNewMsg)
-        ujson.Obj("success" -> true, "err" -> "")
-    }
-
-//    private def sendMsg(msg: String, session: Session) = {
-//        session.getCurrentUser.map(user => { //TODO Map for Optional[String]?
-//            msgSvc.add(user, Layouts.msgContent(msg) /*TODO manage other params*/)
-//            openConnections.foreach(notifyNewMsg)
-//            ujson.Obj("success" -> true, "err" -> "")
-//        }).getOrElse(ujson.Obj("success" -> false, "err" -> "Please log in first !"))
-//    }
-
-    @cask.websocket("/subscribe")
-    def subscribe(): cask.WebsocketResult =
-        cask.WsHandler { channel =>
-            openConnections += channel
-//            channel.send(cask.Ws.Text(latestMessages()))
-            cask.WsActor {
-//                case cask.Ws.Text("") => channel.send(cask.Ws.Close())
-                case cask.Ws.Text(_) => notifyNewMsg(channel)
-                case cask.Ws.Close(_, _) => openConnections -= channel
-            }
-        }
-
-
-    // TODO - Part 3 Step 4d: Delete the message history when a GET is made to `/clearHistory`
-    @getSession(sessionSvc) // This decorator fills the `(session: Session)` part of the `index` method.
-    @cask.get("/clearHistory")
-    def clearHistory()(session: Session) =
-        msgSvc.deleteHistory()
-        Layouts.homepage(session.getCurrentUser)
-
-
-    // TODO - Part 3 Step 5: Modify the code of step 4b to process the messages sent to the bot (message
-    //      starts with `@bot `). This message and its reply from the bot will be added to the message
-    //      store together.
-    //
-    //      The exceptions raised by the `Parser` will be treated as an error (same as in step 4b)
-
 
     initialize()
 end MessagesRoutes

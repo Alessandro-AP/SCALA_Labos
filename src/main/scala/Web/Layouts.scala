@@ -12,7 +12,7 @@ import scalatags.Text.tags2.nav
 import Utils.StatusCode
 
 /**
-  * Assembles the method used to layout ScalaTags
+  * Assembles the method used to layout ScalaTags.
   * 
   * This class contains the views and components of our HTML pages.
   */
@@ -50,8 +50,8 @@ object Layouts:
     )
   }
 
-  def homepage(username : Option[String]) = {
-    pageLayout(homepageContent(), username)
+  def homepage(username : Option[String], messages: Seq[(Username, MsgContent)] = Seq.empty) = {
+    pageLayout(homepageContent(messages), username)
   }
 
   def msgContent(msg: String): Frag = {
@@ -69,11 +69,14 @@ object Layouts:
     )
   }
 
-  private def homepageContent() = {
+  private def homepageContent(messages: Seq[(Username, MsgContent)]) = {
     div(cls := "content")(
       div(id := "boardMessage")(
         div(cls := "msg")(
-          span(cls := "msg-content")("Please wait, the messages are loading !")
+          if messages.isEmpty then
+            span(cls := "msg-content")("No messages have been send yet !")
+          else
+            msgList(messages)          
         )
       ),
       form(id := "msgForm", onsubmit := "submitMessageForm();return false")(

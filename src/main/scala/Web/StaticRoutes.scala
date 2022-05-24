@@ -11,13 +11,13 @@ package Web
 class StaticRoutes()(implicit val log: cask.Logger) extends cask.Routes:
 
     /**
-      * Method for serving .js files.
+      * Serve .js files.
       */
     @cask.staticResources("/static/js" )
     def staticResourcesJs() = "./js"
 
     /**
-      * Method for serving .css files.
+      * Serve .css files.
       */
     @cask.staticResources("/static/css")
     def staticResourcesCss() = "./css"

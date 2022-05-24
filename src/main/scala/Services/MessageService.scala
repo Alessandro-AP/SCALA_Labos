@@ -40,18 +40,19 @@ trait MessageService:
     def deleteHistory(): Unit
 
 class MessageImpl extends MessageService:
-    // TODO - Part 3 Step 4a: Store the messages and the corresponding user in memory.
-    //       Implement methods to add new messages, to get the last 20 messages and to delete all existing messages.
+    
+    private val messages = ListBuffer[(Long,Username,MsgContent,Option[Username],Option[ExprTree],Option[Long])]()
 
-    val messages = ListBuffer[(Long,Username,MsgContent,Option[Username],Option[ExprTree],Option[Long])]()
-
-    override def add(sender: Username, msg: MsgContent, mention: Option[Username] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None): Long =
-        val id : Long = System.currentTimeMillis()
-        messages.append( (id,sender,msg,mention,exprType,replyToId) )
+    override def add(sender: Username, msg: MsgContent, mention: Option[Username] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None): Long = {
+        val id: Long = System.currentTimeMillis()
+        messages.append((id, sender, msg, mention, exprType, replyToId))
         id
+    }
 
-    override def getLatestMessages(n: Int): Seq[(Username, MsgContent)] =
+    override def getLatestMessages(n: Int): Seq[(Username, MsgContent)] = {
         messages.take(n).map(m => (m._2,m._3) ).toSeq
+    }
 
-    override def deleteHistory(): Unit =
+    override def deleteHistory(): Unit = {
         messages.clear()
+    }

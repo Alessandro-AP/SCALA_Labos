@@ -41,7 +41,7 @@ class UsersRoutes(accountSvc: AccountService,
 
     @getSession(sessionSvc)
     @cask.postForm("/register")
-    def postRegister(username: String)(session: Session) =
+    def postRegister(username: String)(session: Session) = {
       if (accountSvc.isAccountExisting(username)) {
         Layouts.login(StatusCode.RegisterError, session.getCurrentUser)
       }
@@ -50,14 +50,15 @@ class UsersRoutes(accountSvc: AccountService,
         session.setCurrentUser(username)
         Layouts.successPage(session.getCurrentUser)
       }
-    end postRegister
+    }
 
     @getSession(sessionSvc)
     @cask.get("/logout")
-    def logout()(session: Session) =
-      if(session.getCurrentUser.isDefined)
+    def logout()(session: Session) = {
+      if session.getCurrentUser.isDefined then
         session.reset()
       Layouts.successPage(session.getCurrentUser)
+    }
 
     initialize()
 end UsersRoutes
