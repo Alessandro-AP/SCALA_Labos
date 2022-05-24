@@ -29,22 +29,23 @@ object Layouts:
       script(src := "static/js/main.js"),
     )
   }
-
-  private def navBarLayout(username : Option[String]) = {
+  
+  private def navBarLayout(username: Option[String], link : Option[Frag]) = {
     nav(
       a(cls := "nav-brand")("Bot-tender"),
       div(cls := "nav-item")(
-       if (username.isDefined) div( p(display:= "inline", margin := "6px")(s"Hello ${username.get}"), a(href := "/logout")("Logout"))
-       else a(href := "/login")("Log in"),
+        username.map(u =>
+          div(p(display := "inline", margin := "6px")(s"Hello $u"),a(href := "/logout")("Logout"))
+        ).getOrElse(link.getOrElse(a(href := "/login")("Log in"))),
       )
     )
   }
 
-  private def pageLayout(content: scalatags.Text.Modifier, username : Option[String]) = {
+  private def pageLayout(content: scalatags.Text.Modifier, username : Option[String], link : Option[Frag] = None) = {
     html(
       headLayout,
       body(
-        navBarLayout(username),
+        navBarLayout(username, link),
         content
       )
     )
@@ -74,7 +75,7 @@ object Layouts:
       div(id := "boardMessage")(
         div(cls := "msg")(
           if messages.isEmpty then
-            span(cls := "msg-content")("No messages have been send yet !")
+            span(cls := "msg-content")("No messages have been sent yet !")
           else
             msgList(messages)          
         )
@@ -88,8 +89,8 @@ object Layouts:
     )
   }
 
-  def login(statusCode: StatusCode, username : Option[String]) = {
-    pageLayout(loginContent(statusCode), username)
+  def login(statusCode: StatusCode) = {
+    pageLayout(loginContent(statusCode), None, Some(a(href := "/")("Back to chat")))
   }
 
   private def loginContent(statusCode: StatusCode) = {

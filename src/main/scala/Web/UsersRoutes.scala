@@ -21,10 +21,9 @@ class UsersRoutes(accountSvc: AccountService,
 
     import Decorators.getSession
 
-    @getSession(sessionSvc)
     @cask.get("/login")
-    def login()(session: Session) = {
-      Layouts.login(StatusCode.OK, session.getCurrentUser)
+    def login() = {
+      Layouts.login(StatusCode.OK)
     }
 
     @getSession(sessionSvc)
@@ -35,7 +34,7 @@ class UsersRoutes(accountSvc: AccountService,
         Layouts.successPage(session.getCurrentUser)
       }
       else {
-        Layouts.login(StatusCode.LoginError, session.getCurrentUser)
+        Layouts.login(StatusCode.LoginError)
       }
     }
 
@@ -43,7 +42,7 @@ class UsersRoutes(accountSvc: AccountService,
     @cask.postForm("/register")
     def postRegister(username: String)(session: Session) = {
       if (accountSvc.isAccountExisting(username)) {
-        Layouts.login(StatusCode.RegisterError, session.getCurrentUser)
+        Layouts.login(StatusCode.RegisterError)
       }
       else {
         accountSvc.addAccount(username, accountSvc.defaultBalance)

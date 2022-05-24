@@ -53,8 +53,8 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       * Process the new messages sent as JSON object to `/send`.
       * @param msg Message sent
       * @param session Current session
-      * @return a JSON object indicating a success or a error with a message. 
-      *         Error in case of : 
+      * @return a JSON object indicating a success or a error with a message.
+      *         Error in case of :
       *         - No user is logged in
       *         - The message is empty
       */
@@ -125,13 +125,13 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       * When the message contains an @ it is treated as a mention.
       * If the mention is addressed to the bot, it will process the message and provide a reply.
       * Otherwise, a user is mentioned.
-      * 
+      *
       * @param msg Message to be sent
       * @param session Current Session
       * @return a JSON object indicating a success or a error with a message.
       */
     private def handleMention(msg: String, session: Session) = {
-        val mention = msg.substring(1, msg.indexOf(" "))
+        val mention = if msg.contains(" ") then msg.substring(1, msg.indexOf(" ")) else msg.substring(1) // check mention format
         if mention.toLowerCase == BOT.toLowerCase then
             handleBot(msg, session)
         else
