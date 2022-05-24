@@ -92,18 +92,13 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
     }
 
     /**
-      * @return The layout containing the list of the MESSAGES_LIMIT latest messages.
-      */
-    def latestMessages(): String = {
-        Layouts.msgList(msgSvc.getLatestMessages(MessageService.MESSAGES_LIMIT)).render
-    }
-
-    /**
       * Send the MESSAGES_LIMIT latest messages on the provided connection.
       * @param connection between two hosts
       */
     def sendLatestMsg(connection: cask.WsChannelActor): Unit = {
-        connection.send(cask.Ws.Text(latestMessages()))
+        connection.send(cask.Ws.Text(
+          Layouts.msgList(msgSvc.getLatestMessages(MessageService.MESSAGES_LIMIT)).render)
+        )
     }
 
     /**
