@@ -6,16 +6,21 @@ package Web
 
 /**
   * Assembles the routes dealing with static files.
+  * This class allows our static files (`.js` and `.css`) to be accessed from the browser.
   */
 class StaticRoutes()(implicit val log: cask.Logger) extends cask.Routes:
-    // TODO - Part 3 Step 1: Make the resources files (`.js` and `.css`) available to the browser.
-    //      Do not forget to link to them from your HTML.
 
+    /**
+      * Method for serving .js files.
+      */
     @cask.staticResources("/static/js" )
-    def staticFileJs() = "./js"
+    def staticResourcesJs() = "./js"
 
+    /**
+      * Method for serving .css files.
+      */
     @cask.staticResources("/static/css")
-    def staticFileCss() = "./css"
+    def staticResourcesCss() = "./css"
 
     initialize()
 end StaticRoutes

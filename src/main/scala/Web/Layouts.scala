@@ -13,6 +13,8 @@ import Utils.StatusCode
 
 /**
   * Assembles the method used to layout ScalaTags
+  * 
+  * This class contains the views and components of our HTML pages.
   */
 object Layouts:
 

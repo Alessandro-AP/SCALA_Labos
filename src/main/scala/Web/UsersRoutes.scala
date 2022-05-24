@@ -33,7 +33,6 @@ class UsersRoutes(accountSvc: AccountService,
       if (accountSvc.isAccountExisting(username)) {
         session.setCurrentUser(username)
         Layouts.successPage(session.getCurrentUser)
-//        cask.Redirect("/success")
       }
       else {
         Layouts.login(StatusCode.LoginError, session.getCurrentUser)
@@ -50,7 +49,6 @@ class UsersRoutes(accountSvc: AccountService,
         accountSvc.addAccount(username, accountSvc.defaultBalance)
         session.setCurrentUser(username)
         Layouts.successPage(session.getCurrentUser)
-//        cask.Redirect("/success")
       }
     end postRegister
 
@@ -60,12 +58,6 @@ class UsersRoutes(accountSvc: AccountService,
       if(session.getCurrentUser.isDefined)
         session.reset()
       Layouts.successPage(session.getCurrentUser)
-
-  //    @getSession(sessionSvc)
-//    @cask.get("/success")
-//    def success()(session: Session) =
-//      Layouts.successPage
-//    end success
 
     initialize()
 end UsersRoutes
