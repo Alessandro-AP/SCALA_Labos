@@ -77,8 +77,9 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
         try{
             val tokenized = tokenizerSvc.tokenize(msg.substring(4).trim.toLowerCase)
             val expr = Parser(tokenized).parsePhrases()
-            sendMsg(session.getCurrentUser.get ,msg)
-            sendMsg("bot", analyzerSvc.reply(session)(expr))
+            val id = msgSvc.add(session.getCurrentUser.get, Layouts.msgContent(msg))
+            openConnections.foreach(notifyNewMsg)
+            sendMsg("bot", analyzerSvc.reply(session)(expr),None, Some(expr), Some(id))
         }catch {
             case _: Chat.UnexpectedTokenException => ujson.Obj("success" -> false, "err" -> "Invalid command!")
         }
