@@ -13,7 +13,7 @@ import Utils.StatusCode
   * - One route to process the login form and display the login success page
   * - One route to process the register form and display the register success page
   * - One route to logout and display the logout success page
-  * 
+  *
   * The username of the current session user is stored inside a cookie called `username`.
   */
 class UsersRoutes(accountSvc: AccountService,
@@ -23,13 +23,13 @@ class UsersRoutes(accountSvc: AccountService,
 
     @getSession(sessionSvc)
     @cask.get("/login")
-    def login()(session: Session) =
+    def login()(session: Session) = {
       Layouts.login(StatusCode.OK, session.getCurrentUser)
+    }
 
     @getSession(sessionSvc)
     @cask.postForm("/login")
-    def postLogin(username: String)(session: Session) =
-      println("")
+    def postLogin(username: String)(session: Session) = {
       if (accountSvc.isAccountExisting(username)) {
         session.setCurrentUser(username)
         Layouts.successPage(session.getCurrentUser)
@@ -37,7 +37,7 @@ class UsersRoutes(accountSvc: AccountService,
       else {
         Layouts.login(StatusCode.LoginError, session.getCurrentUser)
       }
-    end postLogin
+    }
 
     @getSession(sessionSvc)
     @cask.postForm("/register")
