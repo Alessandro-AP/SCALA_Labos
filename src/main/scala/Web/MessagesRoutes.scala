@@ -53,7 +53,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       * Process the new messages sent as JSON object to `/send`.
       * @param msg Message sent
       * @param session Current session
-      * @return a JSON object indicating a success or a error with a message.
+      * @return a JSON object indicating a success or an error with a message.
       *         Error in case of :
       *         - No user is logged in
       *         - The message is empty
@@ -123,7 +123,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       *
       * @param msg Message to be sent
       * @param session Current Session
-      * @return a JSON object indicating a success or a error with a message.
+      * @return a JSON object indicating a success or an error with a message.
       */
     private def handleMention(msg: String, session: Session) = {
         val mention = if msg.contains(" ") then msg.substring(1, msg.indexOf(" ")) else msg.substring(1) // check mention format
@@ -138,7 +138,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       * will be added to the message store together.
       * @param msg Message sent to the bot
       * @param session Current session
-      * @return a JSON object indicating a succes or a error with a message.
+      * @return a JSON object indicating a success or an error with a message.
       */
     private def handleBot(msg: String, session: Session) = {
         try {
