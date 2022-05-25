@@ -6,7 +6,7 @@ import org.scalatest._
 import flatspec.AnyFlatSpec
 import matchers.should._
 import Chat.{AnalyzerService, Parser, TokenizerService}
-import Data.*
+import Services._
 import Utils.{Dictionary, SpellCheckerImpl, SpellCheckerService}
 
 class UnitTest extends AnyFlatSpec with Matchers {

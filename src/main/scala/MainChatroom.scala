@@ -4,7 +4,7 @@
 
 import Web.{UsersRoutes, MessagesRoutes, StaticRoutes}
 import Chat._
-import Data._
+import Services._
 import Utils._
 
 object MainChatroom extends cask.Main:

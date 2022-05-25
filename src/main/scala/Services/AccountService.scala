@@ -2,7 +2,7 @@
 // Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
 // Date: 24.05.22
 
-package Data
+package Services
 
 import scala.collection.mutable
 

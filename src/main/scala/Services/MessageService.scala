@@ -2,11 +2,12 @@
 // Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
 // Date: 24.05.22
 
-package Data
+package Services
 
 import Chat.ExprTree
-import Data.MessageService.{MsgContent, Username}
+import Services.MessageService.{MsgContent, Username}
 import scalatags.Text.Frag
+
 import scala.collection.mutable.ListBuffer
 
 
@@ -44,7 +45,7 @@ class MessageImpl extends MessageService:
     private val messages = ListBuffer[(Long,Username,MsgContent,Option[Username],Option[ExprTree],Option[Long])]()
 
     override def add(sender: Username, msg: MsgContent, mention: Option[Username] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None): Long = {
-        val id: Long = System.currentTimeMillis()
+        val id: Long = System.currentTimeMillis() // unique because messages received on a Websocket connection are handled in a single-threaded manner by default.
         messages.append((id, sender, msg, mention, exprType, replyToId))
         id
     }

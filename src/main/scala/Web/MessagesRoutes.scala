@@ -5,8 +5,8 @@
 package Web
 
 import Chat.{AnalyzerService, ExprTree, Parser, TokenizerService}
-import Data.MessageService.MESSAGES_LIMIT
-import Data.{AccountService, MessageService, Session, SessionService}
+import Services.{AccountService, MessageService, Session, SessionService}
+import Services.MessageService.MESSAGES_LIMIT
 
 import scala.collection.mutable.Set
 import castor.Context.Simple.global

@@ -4,7 +4,7 @@
 
 package Web
 
-import Data.{Session, SessionService}
+import Services.{Session, SessionService}
 import cask.model.Response
 import cask.router.Result
 

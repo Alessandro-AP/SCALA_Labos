@@ -4,8 +4,8 @@
 
 package Web
 
-import Data.MessageService
-import Data.MessageService.{MsgContent, Username}
+import Services.MessageService
+import Services.MessageService.{MsgContent, Username}
 import scalatags.Text
 import scalatags.Text.all.*
 import scalatags.Text.tags2.nav

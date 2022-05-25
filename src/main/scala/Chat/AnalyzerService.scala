@@ -3,7 +3,7 @@
 // Date: 24.05.22
 
 package Chat
-import Data.{AccountService, ProductService, Session}
+import Services.{AccountService, ProductService, Session}
 
 class AnalyzerService(productSvc: ProductService,
                       accountSvc: AccountService):

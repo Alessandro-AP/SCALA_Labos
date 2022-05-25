@@ -4,7 +4,7 @@
 
 package Web
 
-import Data.{AccountService, SessionService, Session}
+import Services.{AccountService, SessionService, Session}
 import Utils.StatusCode
 
 /**

@@ -5,7 +5,7 @@
 import scala.io.StdIn
 import Utils._
 import Chat.{TokenizerService, Token, UnexpectedTokenException, Parser, AnalyzerService}
-import Data._
+import Services._
 
 import scala.io.StdIn
 
@@ -33,13 +33,8 @@ object MainParser:
         case s =>
           try
             val tokenized = tokenizerSvc.tokenize(s)
-
-            val parser = new Parser(tokenized)
-            val expr = parser.parsePhrases()
-
-            val printResult = analyzerSvc.reply(session)(expr)
-
-            println(printResult)
+            val expr = Parser(tokenized).parsePhrases()
+            println(analyzerSvc.reply(session)(expr))
           catch
             case e: UnexpectedTokenException => println(s"Invalid input. ${e.getMessage}")
     end while
