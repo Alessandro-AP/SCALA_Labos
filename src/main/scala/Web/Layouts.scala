@@ -18,6 +18,8 @@ import Utils.StatusCode
   */
 object Layouts:
 
+  type HtmlTag = Text.TypedTag[String]
+
   private def headLayout = {
     head(
       meta(charset := "utf-8"),
@@ -41,7 +43,7 @@ object Layouts:
     )
   }
 
-  private def pageLayout(content: scalatags.Text.Modifier, username : Option[String], link : Option[Frag] = None) = {
+  private def pageLayout(content: Text.TypedTag[String], username : Option[String], link : Option[Frag] = None) = {
     html(
       headLayout,
       body(
@@ -51,7 +53,7 @@ object Layouts:
     )
   }
 
-  def homepage(username : Option[String], messages: Seq[(Username, MsgContent)] = Seq.empty) = {
+  def homepage(username : Option[String], messages: Seq[(Username, MsgContent)] = Seq.empty): HtmlTag = {
     pageLayout(homepageContent(messages), username)
   }
 
@@ -59,7 +61,7 @@ object Layouts:
     span(cls := "msg-content")(msg)
   }
 
-  def msgList(messages: Seq[(Username, MsgContent)]) = {
+  def msgList(messages: Seq[(Username, MsgContent)]): Frag = {
     frag(
       for ((author, msg) <- messages)
       yield
@@ -89,7 +91,7 @@ object Layouts:
     )
   }
 
-  def login(statusCode: StatusCode) = {
+  def login(statusCode: StatusCode): HtmlTag = {
     pageLayout(loginContent(statusCode), None, Some(a(href := "/")("Back to chat")))
   }
 
@@ -127,7 +129,7 @@ object Layouts:
       div(display := "none") // doesn't work without else
   }
 
-  def successPage(username: Option[String]) = {
+  def successPage(username: Option[String] = None): HtmlTag = {
     pageLayout(
       div(cls := "content", cls := "success")(
         p(cls := "title")("Bienvenue sur Bot-tinder, appuyez sur le bouton ci-dessous pour retourner au Chat !"),

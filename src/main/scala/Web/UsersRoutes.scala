@@ -54,9 +54,8 @@ class UsersRoutes(accountSvc: AccountService,
     @getSession(sessionSvc)
     @cask.get("/logout")
     def logout()(session: Session) = {
-      if session.getCurrentUser.isDefined then
-        session.reset()
-      Layouts.successPage(session.getCurrentUser)
+      session.reset()
+      Layouts.successPage()
     }
 
     initialize()
