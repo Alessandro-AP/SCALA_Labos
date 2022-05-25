@@ -7,6 +7,7 @@ package Web
 import Chat.{AnalyzerService, ExprTree, Parser, TokenizerService}
 import Services.{AccountService, MessageService, Session, SessionService}
 import Services.MessageService.MESSAGES_LIMIT
+import Web.Layouts.HtmlTag
 
 import scala.collection.mutable.Set
 import castor.Context.Simple.global
@@ -45,7 +46,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       */
     @getSession(sessionSvc) // This decorator fills the `(session: Session)` part of the `index` method.
     @cask.get("/")
-    def index()(session: Session) = {
+    def index()(session: Session): HtmlTag = {
         Layouts.homepage(session.getCurrentUser, msgSvc.getLatestMessages(MESSAGES_LIMIT))
     }
 
@@ -60,7 +61,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       */
     @getSession(sessionSvc)
     @cask.postJson("/send")
-    def send(msg: String)(session: Session) = {
+    def send(msg: String)(session: Session): Obj = {
         if msg.isBlank then ujson.Obj(SUCCESS -> false, ERR -> ERR_NOT_BLANK)
         else if session.getCurrentUser.isEmpty then ujson.Obj(SUCCESS -> false, ERR -> ERR_LOGIN)
         else if msg.startsWith("@") then handleMention(msg, session)
@@ -86,7 +87,7 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       */
     @getSession(sessionSvc)
     @cask.get("/clearHistory")
-    def clearHistory()(session: Session) = {
+    def clearHistory()(session: Session): HtmlTag = {
         msgSvc.deleteHistory()
         Layouts.homepage(session.getCurrentUser)
     }

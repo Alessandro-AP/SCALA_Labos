@@ -4,8 +4,9 @@
 
 package Web
 
-import Services.{AccountService, SessionService, Session}
+import Services.{AccountService, Session, SessionService}
 import Utils.StatusCode
+import Web.Layouts.HtmlTag
 
 /**
   * Assembles the routes dealing with the users:
@@ -22,13 +23,13 @@ class UsersRoutes(accountSvc: AccountService,
     import Decorators.getSession
 
     @cask.get("/login")
-    def login() = {
+    def login(): HtmlTag = {
       Layouts.login(StatusCode.OK)
     }
 
     @getSession(sessionSvc)
     @cask.postForm("/login")
-    def postLogin(username: String)(session: Session) = {
+    def postLogin(username: String)(session: Session): HtmlTag = {
       if (accountSvc.isAccountExisting(username)) {
         session.setCurrentUser(username)
         Layouts.successPage(session.getCurrentUser)
@@ -40,7 +41,7 @@ class UsersRoutes(accountSvc: AccountService,
 
     @getSession(sessionSvc)
     @cask.postForm("/register")
-    def postRegister(username: String)(session: Session) = {
+    def postRegister(username: String)(session: Session): HtmlTag = {
       if (accountSvc.isAccountExisting(username)) {
         Layouts.login(StatusCode.RegisterError)
       }
@@ -53,7 +54,7 @@ class UsersRoutes(accountSvc: AccountService,
 
     @getSession(sessionSvc)
     @cask.get("/logout")
-    def logout()(session: Session) = {
+    def logout()(session: Session): HtmlTag = {
       session.reset()
       Layouts.successPage()
     }
