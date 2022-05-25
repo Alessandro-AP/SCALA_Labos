@@ -46,12 +46,12 @@ class MessageImpl extends MessageService:
 
     override def add(sender: Username, msg: MsgContent, mention: Option[Username] = None, exprType: Option[ExprTree] = None, replyToId: Option[Long] = None): Long = {
         val id: Long = System.currentTimeMillis() // unique because messages received on a Websocket connection are handled in a single-threaded manner by default.
-        messages.prepend((id, sender, msg, mention, exprType, replyToId))
+        messages.append((id, sender, msg, mention, exprType, replyToId))
         id
     }
 
     override def getLatestMessages(n: Int): Seq[(Username, MsgContent)] = {
-        messages.take(n).reverse.map(m => (m._2,m._3) ).toSeq
+        messages.takeRight(n).map(m => (m._2,m._3) ).toSeq
     }
 
     override def deleteHistory(): Unit = {
