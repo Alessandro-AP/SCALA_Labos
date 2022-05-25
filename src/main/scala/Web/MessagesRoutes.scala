@@ -141,13 +141,14 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
       * @return a JSON object indicating a succes or a error with a message.
       */
     private def handleBot(msg: String, session: Session) = {
-        try{
+        try {
             val tokenized = tokenizerSvc.tokenize(msg.substring(4).trim.toLowerCase)
             val expr = Parser(tokenized).parsePhrases()
+            if expr.isInstanceOf[ExprTree.Login] then throw Chat.UnexpectedTokenException("Not allowed here")
             val id = msgSvc.add(session.getCurrentUser.get, Layouts.msgContent(msg))
             openConnections.foreach(sendLatestMsg)
-            notifyNewMsg(BOT, analyzerSvc.reply(session)(expr),None, Some(expr), Some(id))
-        }catch {
+            notifyNewMsg(BOT, analyzerSvc.reply(session)(expr), None, Some(expr), Some(id))
+        } catch {
             case _: Chat.UnexpectedTokenException => ujson.Obj(SUCCESS -> false, ERR -> ERR_INVALID_CMD)
         }
     }
