@@ -107,7 +107,7 @@ object Layouts:
       div(
         p(cls := "title")("Register"),
         form(id := "registerForm", action := "/register", method := "post")(
-          errorSection(statusCode, StatusCode.RegisterError, "User already exists, choose another username !"),
+          errorSection(statusCode, StatusCode.RegisterError, "Username not valid or already exists, please choose another username !"),
           loginInputs
         )
       )

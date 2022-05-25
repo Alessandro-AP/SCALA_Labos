@@ -42,7 +42,7 @@ class UsersRoutes(accountSvc: AccountService,
     @getSession(sessionSvc)
     @cask.postForm("/register")
     def postRegister(username: String)(session: Session): HtmlTag = {
-      if (accountSvc.isAccountExisting(username)) {
+      if (accountSvc.isAccountExisting(username) || username.isBlank) {
         Layouts.login(StatusCode.RegisterError)
       }
       else {
