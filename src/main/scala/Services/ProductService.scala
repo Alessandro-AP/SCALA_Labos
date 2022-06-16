@@ -4,6 +4,11 @@
 
 package Services
 
+import scala.concurrent.Future
+import Utils.FutureOps.randomSchedule
+
+import scala.concurrent.duration.{Duration, DurationConversions, MILLISECONDS}
+
 trait ProductService:
   type BrandName = String
   type ProductName = String
@@ -21,7 +26,12 @@ trait ProductService:
     */
   def getDefaultBrand(product: ProductName): BrandName
 
+  def getPreparationTime(product: ProductName): Future[Unit]
+
 class ProductImpl extends ProductService:
+  private val Biere = "biere"
+  private val Croissant = "croissant"
+
   private val beers : Map[String, Double] = Map(
     ("boxer", 1.0),
     ("farmer", 1.0),
@@ -34,14 +44,21 @@ class ProductImpl extends ProductService:
     ("maison", 2.0),
     ("cailler", 2.0))
 
+  private val productPrepTime: Map[String, Future[Unit]] = Map(
+    (Biere, randomSchedule(Duration(5, MILLISECONDS))),
+    (Croissant, randomSchedule(Duration(10, MILLISECONDS))))
+
   def getPrice(product: ProductName, brand: String): Double =
-    if (product == "biere") beers(brand)
-    else if (product == "croissant") croissants(brand)
+    if (product == Biere) beers(brand)
+    else if (product == Croissant) croissants(brand)
     else 0.0
 
   def getDefaultBrand(product: ProductName): BrandName =
-    if (product == "biere") "boxer"
-    else if (product == "croissant") "maison"
+    if (product == Biere) "boxer"
+    else if (product == Croissant) "maison"
     else throw Exception("unknown product")
+
+  def getPreparationTime(product: ProductName): Future[Unit] =
+    productPrepTime(product)
 
 end ProductImpl

@@ -1,5 +1,5 @@
 import Chat.*
-import Data.*
+import Services.*
 import Utils.*
 import Web.{StaticRoutes, UsersRoutes}
 import Web.{MessagesRoutes}

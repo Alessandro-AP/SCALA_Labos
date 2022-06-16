@@ -1,7 +1,7 @@
-package Data
+package Services
 
 import Chat.ExprTree
-import Data.MessageService.{MsgContent, Username}
+import Services.MessageService.{MsgContent, Username}
 import scalatags.Text.Frag
 
 class MessageConcurrentImpl(messageImpl: MessageImpl) extends MessageService:

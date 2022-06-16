@@ -5,6 +5,9 @@
 package Chat
 import Services.{AccountService, ProductService, Session}
 
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
+
 class AnalyzerService(productSvc: ProductService,
                       accountSvc: AccountService):
   import ExprTree._
@@ -68,9 +71,16 @@ class AnalyzerService(productSvc: ProductService,
     */
   private def processOrder(request: ExprTree, session: Session): String =
     session.getCurrentUser.map(u =>
-      val cost = computePrice(request)
-      s"Voici donc ${reply(session)(request)} ! Cela coûte CHF $cost et " +
-        s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.").getOrElse(askForAuth)
+      // TODO check how to manage the future with replay or else
+      val futureOrder = prepareOrder(request) transform {
+        case Success(products) =>
+          val cost = computePrice(products)
+          Try(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
+            s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.")
+        case Failure(exception) => throw Exception("cannot be prepared")
+      }
+      s"Votre commande est en cours de préparation: ${reply(session)(request)}."
+    ).getOrElse(askForAuth)
 
   /**
     * Processes a request for an user account balance.
@@ -79,5 +89,19 @@ class AnalyzerService(productSvc: ProductService,
     */
   private def processSolde(session: Session): String =
     session.getCurrentUser.map(u => s"Le montant actuel de votre solde est de CHF ${accountSvc.getAccountBalance(u)}.").getOrElse(askForAuth)
+
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  def prepareOrder(t: ExprTree): Future[ExprTree] = t match
+      // Orders & products
+      case ProductRequest(quantity, productType, brand) =>
+        // TODO check how to manage the future
+        productSvc.getPreparationTime(productType) transformWith {
+          case Success(value) => Future.successful(ProductRequest(quantity, productType, brand))
+          case Failure(exception) => throw Exception("cannot be prepared")
+        }
+      // Logical op
+      case Or(left, right) => if computePrice(left) <= computePrice(right) then prepareOrder(left) else prepareOrder(right)
+      case And(left, right) => ???
 
 end AnalyzerService

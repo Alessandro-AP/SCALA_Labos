@@ -4,7 +4,8 @@
 
 package Services
 
-import scala.collection.mutable
+//import scala.collection.mutable
+import scala.collection.concurrent.TrieMap
 
 trait AccountService:
   val defaultBalance: Double = 30.0
@@ -39,7 +40,7 @@ trait AccountService:
   def purchase(user: String, amount: Double): Double
 
 class AccountImpl extends AccountService:
-  private val accounts: mutable.Map[String, Double] = mutable.Map()
+  private val accounts: TrieMap[String, Double] = TrieMap()
 
   def getAccountBalance(user: String): Double = accounts getOrElse (user, 0.0)
 
@@ -50,7 +51,6 @@ class AccountImpl extends AccountService:
   def purchase(user: String, amount: Double): Double =
     require(isAccountExisting(user), "User unknown!")
     val newBalance = accounts(user) - amount
-    accounts(user) = newBalance
-    newBalance
+    accounts.updateWith(user)(_ => Some(newBalance)).getOrElse(0.0)
 
 end AccountImpl
