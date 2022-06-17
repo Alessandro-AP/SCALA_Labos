@@ -1,6 +1,6 @@
-// SCALA - Labo 3
+// SCALA - Labo 4
 // Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
-// Date: 24.05.22
+// Date: 17.06.22
 
 package Chat
 import Services.{AccountService, ProductService, Session}
@@ -72,30 +72,28 @@ class AnalyzerService(productSvc: ProductService,
     * @return if the user is logged in, returns the order response, otherwise a login invitation.
     */
   private def processOrder(request: ExprTree, session: Session): String =
-    session.getCurrentUser.map(u =>
+    session.getCurrentUser.map(u => {
       val originalCost = computePrice(request)
-      // TODO check how to manage the future with replay or else
-      prepareOrder(request) transform {
+      prepareOrder(request).transform {
+        // Avec notre implémentation, ça n'a pas de sens de renvoyer un futur ici,
+        // car on en fait rien. Il faudrait utiliser onComplete (juste besoin du side effect),
+        // mais comme nous n'avons pas le droit de l'utiliser, nous avons utilisé transform.
         case Success(products) =>
           val cost = computePrice(products)
-          if cost != originalCost then
-          Try(tq.transfer(s"Voici votre commande partielle : ${reply(session)(products)} ! Cela coûte CHF $cost et " +
-            s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}."))
+          if cost != originalCost then // partial order
+            tq.transfer(s"Voici votre commande partielle : ${reply(session)(products)} ! Cela coûte " +
+              s"CHF $cost et votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.")
+            Try(())
           else
-          Try(tq.transfer(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
-            s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}."))
-        case Failure(_) => Try(tq.transfer("Votre commande ne peut pas être préparer"))
+            tq.transfer(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
+              s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.")
+            Try(())
+        case Failure(e) =>
+          tq.transfer(s"La commande de ${reply(session)(request)} ne peut pas être délivrée")
+          Try(e)
       }
       s"Votre commande est en cours de préparation: ${reply(session)(request)}."
-    ).getOrElse(askForAuth)
-
-
-//  private def processOrderFuture(request: ExprTree, session: Session): String =
-//    session.getCurrentUser.map(u =>
-//      val cost = computePrice(request)
-//      s"Voici donc ${reply(session)(request)} ! Cela coûte CHF $cost et " +
-//        s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}."
-//    ).getOrElse(askForAuth)
+    }).getOrElse(askForAuth)
 
   /**
     * Processes a request for an user account balance.
@@ -107,8 +105,14 @@ class AnalyzerService(productSvc: ProductService,
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
+  /**
+    * Prepare a future order.
+    * @param t  ExprTree of the order
+    * @return a future of the order ExprTree after preparation done, or a future of failure if
+    *         preparation of the order fail.
+    */
   def prepareOrder(t: ExprTree): Future[ExprTree] = t match
-      // Orders & products
+      // products
       case ProductRequest(quantity, productType, brand) =>
         productSvc.getPreparationTime(productType, brand.getOrElse(productSvc.getDefaultBrand(productType)))
           .flatMap { _ => Future.successful(ProductRequest(quantity, productType, brand)) }
@@ -116,18 +120,23 @@ class AnalyzerService(productSvc: ProductService,
       case Or(left, right) => if computePrice(left) <= computePrice(right) then prepareOrder(left) else prepareOrder(right)
       case And(left, right) =>
         val futures = List(prepareOrder(left), prepareOrder(right))
-        val successes = Future
-          .sequence(futures.map(_.transform(Success(_))))
-          .map(_.collect{case Success(x)=>x})
+        val futureListOfTry = Future.sequence(futures.map(_.transform(Success(_))))
 
-        successes.flatMap { l =>
+        futureListOfTry.flatMap { listOfTry =>
+          val l = listOfTry.collect { case Success(x) => x }
           l.size match
-          {
-            case 0 => Future.failed(Exception("Command failed"))
+            case 0 => Future.failed(Exception("Tous les futures de la commande ont échoués"))
             case 1 => Future.successful(l.head)
-            case 2 =>
-              val x :: y :: _ = l
-              Future.successful(And(x, y))
-          }
+            case 2 => Future.successful(And(l.head, l.last))
         }
+        // alternative avec map :
+//        futureListOfTry.map { listOfTry =>
+//          val l = listOfTry.collect { case Success(x) => x }
+//          l.size match
+//            case 0 => throw Exception("Tous les futures de la commande ont échoués")
+//            case 1 => l.head
+//            case 2 => And(l.head, l.last)
+//        }
+      case _ => throw Exception("Only orders can be prepared")
+
 end AnalyzerService

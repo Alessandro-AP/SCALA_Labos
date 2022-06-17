@@ -1,12 +1,18 @@
+// SCALA - Labo 4
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 17.06.22
+
 import Chat.*
 import Services.*
 import Utils.*
 import Web.{StaticRoutes, UsersRoutes}
-import Web.{MessagesRoutes}
+import Web.MessagesRoutes
+import cask.main.Routes
+
 import java.util.concurrent.TransferQueue
 import java.util.concurrent.LinkedTransferQueue
 
-object MainFuture extends cask.Main:
+object MainChatroomFuture extends cask.Main:
   val tq: TransferQueue[String] = new LinkedTransferQueue[String]()
 
   val spellCheckerSvc = new SpellCheckerImpl(Dictionary.dictionary)
@@ -17,7 +23,7 @@ object MainFuture extends cask.Main:
   val analyzerSvc = new AnalyzerService(productSvc, accountSvc, tq)
   val msgSvc: MessageService = new MessageConcurrentImpl(new MessageImpl())
 
-  val allRoutes = Seq(
+  val allRoutes: Seq[Routes] = Seq(
       StaticRoutes(),
       UsersRoutes(accountSvc, sessionSvc),
       MessagesRoutes(tokenizerSvc, analyzerSvc, msgSvc, accountSvc, sessionSvc, tq),

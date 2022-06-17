@@ -1,13 +1,14 @@
-// SCALA - Labo 3
+// SCALA - Labo 4
 // Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
-// Date: 24.05.22
+// Date: 17.06.22
 
 package Services
 
 import scala.concurrent.Future
 import Utils.FutureOps.randomSchedule
 
-import scala.concurrent.duration.{Duration, DurationConversions, MILLISECONDS, SECONDS}
+import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.duration._
 
 trait ProductService:
   type BrandName = String
@@ -26,33 +27,36 @@ trait ProductService:
     */
   def getDefaultBrand(product: ProductName): BrandName
 
-  def getPreparationTime(product: ProductName, brand: String): Future[Unit]
+  /**
+    * Retrieve the preparation time of a given product.
+    * @param product Product's name.
+    * @param brand Product's brand name.
+    * @return
+    */
+  def getPreparationTime(product: ProductName, brand: BrandName): Future[Unit]
 
 class ProductImpl extends ProductService:
   private val Biere = "biere"
   private val Croissant = "croissant"
 
-  private val beers : Map[String, Double] = Map(
-    ("boxer", 1.0),
-    ("farmer", 1.0),
-    ("wittekop", 2.0),
-    ("punkipa", 3.0),
-    ("jackhammer", 3.0),
-    ("tenebreuse", 4.0))
+  case class Schedule(mean: Duration, std: Duration = 0.second, successRate: Double = 1.0)
+  case class ProductInfo(price: Double, schedule: Schedule)
 
-  private val croissants : Map[String, Double] = Map(
-    ("maison", 2.0),
-    ("cailler", 2.0))
+  private val beers : Map[BrandName, ProductInfo] = Map(
+    ("boxer", ProductInfo(1.0, Schedule(1.second, successRate = 0.6))),
+    ("farmer", ProductInfo(1.0, Schedule(1.second, successRate = 0.6))),
+    ("wittekop", ProductInfo(2.0, Schedule(2.second, successRate = 0.6))),
+    ("punkipa", ProductInfo(3.0, Schedule(3.second, successRate = 0.6))),
+    ("jackhammer", ProductInfo(3.0, Schedule(3.second, successRate = 0.6))),
+    ("tenebreuse", ProductInfo(4.0, Schedule(4.second, successRate = 0.6))))
 
-  private val beersPrepTime: Map[String, Future[Unit]] =
-    beers.map((n: String, p: Double) => n -> randomSchedule(Duration(p, SECONDS), successRate = 0.5))
+  private val croissants : Map[BrandName, ProductInfo] = Map(
+    ("maison", ProductInfo(2.0, Schedule(1.second, successRate = 0.6))),
+    ("cailler", ProductInfo(2.0, Schedule(1.second, successRate = 0.6))))
 
-  private val croissantsPrepTime: Map[String, Future[Unit]] =
-    croissants.map((n: String, p: Double) => n -> randomSchedule(Duration(p, SECONDS), successRate = 0.8))
-
-  def getPrice(product: ProductName, brand: String): Double =
-    if (product == Biere) beers(brand)
-    else if (product == Croissant) croissants(brand)
+  def getPrice(product: ProductName, brand: BrandName): Double =
+    if (product == Biere) beers(brand).price
+    else if (product == Croissant) croissants(brand).price
     else 0.0
 
   def getDefaultBrand(product: ProductName): BrandName =
@@ -60,9 +64,13 @@ class ProductImpl extends ProductService:
     else if (product == Croissant) "maison"
     else throw Exception("unknown product")
 
-  def getPreparationTime(product: ProductName, brand: String): Future[Unit] =
-    if (product == Biere) beersPrepTime(brand)
-    else if (product == Croissant) croissantsPrepTime(brand)
-    else randomSchedule(Duration(0, MILLISECONDS))
+  def getPreparationTime(product: ProductName, brand: BrandName): Future[Unit] =
+    if (product == Biere)
+      val s = beers(brand).schedule
+      randomSchedule(s.mean, successRate = s.successRate)
+    else if (product == Croissant)
+      val s = croissants(brand).schedule
+      randomSchedule(s.mean, successRate = s.successRate)
+    else randomSchedule(Duration(0, SECONDS))
 
 end ProductImpl

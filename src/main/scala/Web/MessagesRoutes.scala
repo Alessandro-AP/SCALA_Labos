@@ -1,6 +1,6 @@
-// SCALA - Labo 3
+// SCALA - Labo 4
 // Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
-// Date: 24.05.22
+// Date: 17.06.22
 
 package Web
 
@@ -26,7 +26,8 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
                      msgSvc: MessageService,
                      accountSvc: AccountService,
                      sessionSvc: SessionService,
-                     tp : TransferQueue[String])(implicit val log: cask.Logger) extends cask.Routes:
+                     tq: TransferQueue[String])
+                    (implicit val log: cask.Logger) extends cask.Routes :
     import Decorators.getSession
 
     // Message constants
@@ -149,27 +150,25 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
             if expr.isInstanceOf[ExprTree.Login] then throw Chat.UnexpectedTokenException("Not allowed here")
             val id = msgSvc.add(session.getCurrentUser.get, Layouts.msgContent(msg))
             openConnections.foreach(sendLatestMsg)
-//            val (msg, futureMsg) = analyzerSvc.reply(session)(expr)
-//            notifyNewMsg(BOT, msg, None, Some(expr), Some(id))
             notifyNewMsg(BOT, analyzerSvc.reply(session)(expr), None, Some(expr), Some(id))
-//            futureMsg.
         } catch {
             case _: Chat.UnexpectedTokenException => ujson.Obj(SUCCESS -> false, ERR -> ERR_INVALID_CMD)
         }
     }
 
-    private def asyncMsgBotHandler(): Unit ={
+    /**
+      * Handle async messages send from the Bot after it finished preparing orders.
+      */
+    private def handleAsyncBotMsg(): Unit = {
         val thread = new Thread {
-            override def run(): Unit = {
-                while(true) {
-                    val msg = tp.take()
-                    notifyNewMsg(BOT, msg, None, None, None)
-                }
-            }
+            override def run(): Unit =
+                while true do
+                    val msg = tq.take()
+                    notifyNewMsg(BOT, msg)
         }
         thread.start()
     }
 
-    asyncMsgBotHandler()
+    handleAsyncBotMsg()
     initialize()
 end MessagesRoutes
