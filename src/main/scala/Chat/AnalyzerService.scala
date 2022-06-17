@@ -7,9 +7,11 @@ import Services.{AccountService, ProductService, Session}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import java.util.concurrent.TransferQueue
 
 class AnalyzerService(productSvc: ProductService,
-                      accountSvc: AccountService):
+                      accountSvc: AccountService,
+                      tq: TransferQueue[String]):
   import ExprTree._
 
   val askForAuth = "Veuillez d'abord vous identifier."
@@ -71,16 +73,29 @@ class AnalyzerService(productSvc: ProductService,
     */
   private def processOrder(request: ExprTree, session: Session): String =
     session.getCurrentUser.map(u =>
+      val originalCost = computePrice(request)
       // TODO check how to manage the future with replay or else
-      val futureOrder = prepareOrder(request) transform {
+      prepareOrder(request) transform {
         case Success(products) =>
           val cost = computePrice(products)
-          Try(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
-            s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.")
-        case Failure(exception) => throw Exception("cannot be prepared")
+          if cost != originalCost then
+          Try(tq.transfer(s"Voici votre commande partielle : ${reply(session)(products)} ! Cela coûte CHF $cost et " +
+            s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}."))
+          else
+          Try(tq.transfer(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
+            s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}."))
+        case Failure(_) => Try(tq.transfer("Votre commande ne peut pas être préparer"))
       }
       s"Votre commande est en cours de préparation: ${reply(session)(request)}."
     ).getOrElse(askForAuth)
+
+
+//  private def processOrderFuture(request: ExprTree, session: Session): String =
+//    session.getCurrentUser.map(u =>
+//      val cost = computePrice(request)
+//      s"Voici donc ${reply(session)(request)} ! Cela coûte CHF $cost et " +
+//        s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}."
+//    ).getOrElse(askForAuth)
 
   /**
     * Processes a request for an user account balance.
@@ -95,13 +110,24 @@ class AnalyzerService(productSvc: ProductService,
   def prepareOrder(t: ExprTree): Future[ExprTree] = t match
       // Orders & products
       case ProductRequest(quantity, productType, brand) =>
-        // TODO check how to manage the future
-        productSvc.getPreparationTime(productType) transformWith {
-          case Success(value) => Future.successful(ProductRequest(quantity, productType, brand))
-          case Failure(exception) => throw Exception("cannot be prepared")
-        }
+        productSvc.getPreparationTime(productType, brand.getOrElse(productSvc.getDefaultBrand(productType)))
+          .flatMap { _ => Future.successful(ProductRequest(quantity, productType, brand)) }
       // Logical op
       case Or(left, right) => if computePrice(left) <= computePrice(right) then prepareOrder(left) else prepareOrder(right)
-      case And(left, right) => ???
+      case And(left, right) =>
+        val futures = List(prepareOrder(left), prepareOrder(right))
+        val successes = Future
+          .sequence(futures.map(_.transform(Success(_))))
+          .map(_.collect{case Success(x)=>x})
 
+        successes.flatMap { l =>
+          l.size match
+          {
+            case 0 => Future.failed(Exception("Command failed"))
+            case 1 => Future.successful(l.head)
+            case 2 =>
+              val x :: y :: _ = l
+              Future.successful(And(x, y))
+          }
+        }
 end AnalyzerService

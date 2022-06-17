@@ -51,6 +51,6 @@ class AccountImpl extends AccountService:
   def purchase(user: String, amount: Double): Double =
     require(isAccountExisting(user), "User unknown!")
     val newBalance = accounts(user) - amount
-    accounts.updateWith(user)(_ => Some(newBalance)).getOrElse(0.0)
+    accounts.updateWith(user)(_ => Some(newBalance)).getOrElse(accounts(user))
 
 end AccountImpl

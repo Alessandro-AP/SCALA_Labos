@@ -8,7 +8,7 @@ import Chat.{AnalyzerService, ExprTree, Parser, TokenizerService}
 import Services.{AccountService, MessageService, Session, SessionService}
 import Services.MessageService.MESSAGES_LIMIT
 import Web.Layouts.HtmlTag
-
+import java.util.concurrent.TransferQueue
 import scala.collection.mutable.Set
 import castor.Context.Simple.global
 import ujson.Obj
@@ -25,7 +25,8 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
                      analyzerSvc: AnalyzerService,
                      msgSvc: MessageService,
                      accountSvc: AccountService,
-                     sessionSvc: SessionService)(implicit val log: cask.Logger) extends cask.Routes:
+                     sessionSvc: SessionService,
+                     tp : TransferQueue[String])(implicit val log: cask.Logger) extends cask.Routes:
     import Decorators.getSession
 
     // Message constants
@@ -148,11 +149,27 @@ class MessagesRoutes(tokenizerSvc: TokenizerService,
             if expr.isInstanceOf[ExprTree.Login] then throw Chat.UnexpectedTokenException("Not allowed here")
             val id = msgSvc.add(session.getCurrentUser.get, Layouts.msgContent(msg))
             openConnections.foreach(sendLatestMsg)
+//            val (msg, futureMsg) = analyzerSvc.reply(session)(expr)
+//            notifyNewMsg(BOT, msg, None, Some(expr), Some(id))
             notifyNewMsg(BOT, analyzerSvc.reply(session)(expr), None, Some(expr), Some(id))
+//            futureMsg.
         } catch {
             case _: Chat.UnexpectedTokenException => ujson.Obj(SUCCESS -> false, ERR -> ERR_INVALID_CMD)
         }
     }
 
+    private def asyncMsgBotHandler(): Unit ={
+        val thread = new Thread {
+            override def run(): Unit = {
+                while(true) {
+                    val msg = tp.take()
+                    notifyNewMsg(BOT, msg, None, None, None)
+                }
+            }
+        }
+        thread.start()
+    }
+
+    asyncMsgBotHandler()
     initialize()
 end MessagesRoutes

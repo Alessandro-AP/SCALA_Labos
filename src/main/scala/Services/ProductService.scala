@@ -7,7 +7,7 @@ package Services
 import scala.concurrent.Future
 import Utils.FutureOps.randomSchedule
 
-import scala.concurrent.duration.{Duration, DurationConversions, MILLISECONDS}
+import scala.concurrent.duration.{Duration, DurationConversions, MILLISECONDS, SECONDS}
 
 trait ProductService:
   type BrandName = String
@@ -26,7 +26,7 @@ trait ProductService:
     */
   def getDefaultBrand(product: ProductName): BrandName
 
-  def getPreparationTime(product: ProductName): Future[Unit]
+  def getPreparationTime(product: ProductName, brand: String): Future[Unit]
 
 class ProductImpl extends ProductService:
   private val Biere = "biere"
@@ -44,9 +44,11 @@ class ProductImpl extends ProductService:
     ("maison", 2.0),
     ("cailler", 2.0))
 
-  private val productPrepTime: Map[String, Future[Unit]] = Map(
-    (Biere, randomSchedule(Duration(5, MILLISECONDS))),
-    (Croissant, randomSchedule(Duration(10, MILLISECONDS))))
+  private val beersPrepTime: Map[String, Future[Unit]] =
+    beers.map((n: String, p: Double) => n -> randomSchedule(Duration(p, SECONDS), successRate = 0.5))
+
+  private val croissantsPrepTime: Map[String, Future[Unit]] =
+    croissants.map((n: String, p: Double) => n -> randomSchedule(Duration(p, SECONDS), successRate = 0.8))
 
   def getPrice(product: ProductName, brand: String): Double =
     if (product == Biere) beers(brand)
@@ -58,7 +60,9 @@ class ProductImpl extends ProductService:
     else if (product == Croissant) "maison"
     else throw Exception("unknown product")
 
-  def getPreparationTime(product: ProductName): Future[Unit] =
-    productPrepTime(product)
+  def getPreparationTime(product: ProductName, brand: String): Future[Unit] =
+    if (product == Biere) beersPrepTime(brand)
+    else if (product == Croissant) croissantsPrepTime(brand)
+    else randomSchedule(Duration(0, MILLISECONDS))
 
 end ProductImpl
