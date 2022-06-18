@@ -83,11 +83,11 @@ class AnalyzerService(productSvc: ProductService,
             try {
               val creditBalance = accountSvc.purchase(u, cost)
               if cost != originalCost then // partial order
-                tq.transfer(s"Voici votre commande partielle : ${reply(session)(products)} ! Cela coûte " +
+                tq.transfer(s"@$u Voici votre commande partielle : ${reply(session)(products)} ! Cela coûte " +
                   s"CHF $cost et votre nouveau solde est de CHF $creditBalance.")
                 Try(())
               else
-                tq.transfer(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
+                tq.transfer(s"@$u Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
                   s"votre nouveau solde est de CHF $creditBalance.")
                 Try(())
             }
@@ -96,7 +96,7 @@ class AnalyzerService(productSvc: ProductService,
               Try(e)
             }
         case Failure(e) =>
-          tq.transfer(s"La commande de ${reply(session)(request)} ne peut pas être délivrée")
+          tq.transfer(s"@$u La commande de ${reply(session)(request)} ne peut pas être délivrée")
           Try(e)
       }
       s"Votre commande est en cours de préparation: ${reply(session)(request)}."
