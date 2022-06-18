@@ -136,14 +136,6 @@ class AnalyzerService(productSvc: ProductService,
             case 1 => Future.successful(l.head)
             case 2 => Future.successful(And(l.head, l.last))
         }
-        // alternative avec map :
-//        futureListOfTry.map { listOfTry =>
-//          val l = listOfTry.collect { case Success(x) => x }
-//          l.size match
-//            case 0 => throw Exception("Tous les futures de la commande ont échoués")
-//            case 1 => l.head
-//            case 2 => And(l.head, l.last)
-//        }
       case _ => throw Exception("Only orders can be prepared")
 
 end AnalyzerService
