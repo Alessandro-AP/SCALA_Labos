@@ -1,12 +1,12 @@
 # SCALA Labos - Bot-tender Future
 
-> ### Fonctionnalité ajoutée par rapport à la branche `origin/Labo_3` :
-> 
-> Gestion de commandes asynchrones en utilisant les Futures de l’API Scala.
+> Authors : Alessandro Parrino & Daniel Sciarra
 
 ## Choix d'implémentation
 
-Dans cette section, nous abordons les différents choix d'implémentation effectués pour les fonctionnalités ajoutées au projet par rapport au précédent laboratoire (branche origin/Labo_3).
+Dans cette section, nous abordons les différents choix d'implémentation effectués pour les fonctionnalités ajoutées au projet par rapport au précédent laboratoire.
+
+Fonctionnalité ajoutée par rapport à la branche `origin/Labo_3` : Gestion de commandes asynchrones en utilisant les Futures de l’API Scala.
 
 ### Temps de préparation des produits
 
