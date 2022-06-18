@@ -1,6 +1,6 @@
 // SCALA - Labo 4
 // Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
-// Date: 17.06.22
+// Date: 19.06.22
 
 import Chat.*
 import Services.*

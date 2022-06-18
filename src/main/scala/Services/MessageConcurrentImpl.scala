@@ -1,3 +1,7 @@
+// SCALA - Labo 4
+// Authors : Alessandro Parrino, Daniel Sciarra ◕◡◕
+// Date: 19.06.22
+
 package Services
 
 import Chat.ExprTree
