@@ -1,16 +1,56 @@
 # SCALA Labos - Bot-tender Future
 
+> ### Fonctionnalité ajoutée par rapport à la branche `origin/Labo_3` :
+> 
+> Gestion de commandes asynchrones en utilisant les Futures de l’API Scala.
+
 ## Choix d'implémentation
 
-Dans cette section, nous abordons les différents choix d'implémentation effectués pour les fonctionnalités ajoutées au projet par rapport au précédent labo (branche origin/Labo_3).
+Dans cette section, nous abordons les différents choix d'implémentation effectués pour les fonctionnalités ajoutées au projet par rapport au précédent laboratoire (branche origin/Labo_3).
 
 ### Temps de préparation des produits
 
-TODO
+Une commande auprès du BOT demande maintenant un temps de préparation. 
+Nous avons donc modifié notre `ProductService` afin d'y ajouter le temps de préparation pour chaque produit proposé et une méthode permettant de retourner ce dernier sous forme d'un Future (`getPreparationTime(...): Future[Unit]`).
+
+Afin de rendre le code plus clair nous avons ajouté 2 classes internes pour représenter les informations d'un produit dans nos structures de données (Map). Voici un aperçu de la modification :
+
+```scala
+class ProductImpl extends ProductService:
+  [...]
+
+  case class Schedule(mean: Duration, std: Duration = 0.second, successRate: Double = 1.0)
+  case class ProductInfo(price: Double, schedule: Schedule)
+
+  private val croissants : Map[BrandName, ProductInfo] = Map(
+    ("maison", ProductInfo(2.0, Schedule(1.second, successRate = 0.6))),
+    ("cailler", ProductInfo(2.0, Schedule(1.second, successRate = 0.6))))
+    
+  [...]
+
+  def getPreparationTime(product: ProductName, brand: BrandName): Future[Unit] =
+    [...]
+    randomSchedule(productSchedule.mean, successRate = productSchedule.successRate)
+    [...]
+
+  [...]
+```
 
 ### Traitement des commandes en préparation
 
-TODO
+Au niveau de notre `AnalyzerService`, nous avons modifié la méthode qui traitait les commandes (`processOrder()`) afin d'y incorporer le traitement de la préparation de ces dernières. 
+Ce traitement est effectué par une nouvelle méthode `prepareOrder()`.
+Une fois la préparation de la commande (et des produits) terminée (traitement des Futures avec succès ou échec), un message est transmis par le bot de façon asynchrone.
+
+Voici un aperçu de l'implémentation en pseudo code :
+
+```scala
+  def processOrder(request, ...): String =
+    prepareOrder(request) transform {
+      // traitement de la commande après sa préparation et envoi d'un message en conséquence du résultat
+    }
+    // transmission du message confirmant la préparation de la commande
+```
 
 ### Envoi des messages sur le chat une fois le traitement fini
 
