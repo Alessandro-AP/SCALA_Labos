@@ -80,14 +80,21 @@ class AnalyzerService(productSvc: ProductService,
         // mais comme nous n'avons pas le droit de l'utiliser, nous avons utilisé transform.
         case Success(products) =>
           val cost = computePrice(products)
-          if cost != originalCost then // partial order
-            tq.transfer(s"Voici votre commande partielle : ${reply(session)(products)} ! Cela coûte " +
-              s"CHF $cost et votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.")
-            Try(())
-          else
-            tq.transfer(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
-              s"votre nouveau solde est de CHF ${accountSvc.purchase(u, cost)}.")
-            Try(())
+            try {
+              val creditBalance = accountSvc.purchase(u, cost)
+              if cost != originalCost then // partial order
+                tq.transfer(s"Voici votre commande partielle : ${reply(session)(products)} ! Cela coûte " +
+                  s"CHF $cost et votre nouveau solde est de CHF $creditBalance.")
+                Try(())
+              else
+                tq.transfer(s"Voici donc ${reply(session)(products)} ! Cela coûte CHF $cost et " +
+                  s"votre nouveau solde est de CHF $creditBalance.")
+                Try(())
+            }
+            catch{ case e : Exception => 
+              tq.transfer(e.getMessage)
+              Try(e)
+            }
         case Failure(e) =>
           tq.transfer(s"La commande de ${reply(session)(request)} ne peut pas être délivrée")
           Try(e)

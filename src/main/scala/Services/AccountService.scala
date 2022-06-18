@@ -51,6 +51,7 @@ class AccountImpl extends AccountService:
   def purchase(user: String, amount: Double): Double =
     require(isAccountExisting(user), "User unknown!")
     val newBalance = accounts(user) - amount
-    accounts.updateWith(user)(_ => Some(newBalance)).getOrElse(accounts(user))
+    if newBalance < 0 then throw Exception("Le solde disponible est insuffisant.")
+    else accounts.updateWith(user)(_ => Some(newBalance)).getOrElse(accounts(user))
 
 end AccountImpl
